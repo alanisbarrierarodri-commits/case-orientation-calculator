@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pallet Box Calculator</title>
+  <style>
+    body { font-family: Arial; margin: 20px; max-width: 400px; }
+    input { width: 100%; padding: 8px; margin: 5px 0; }
+    button { width: 100%; padding: 10px; background: #007BFF; color: white; border: none; }
+    button:hover { background: #0056b3; }
+    .result { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>Pallet Box Calculator</h2>
+  <label>Length (inches):</label>
+  <input type="number" id="length" step="0.01">
+  <label>Width (inches):</label>
+  <input type="number" id="width" step="0.01">
+  <label>Height (inches, optional):</label>
+  <input type="number" id="height" step="0.01">
+  <button onclick="calculate()">Calculate</button>
+  <div class="result" id="result"></div>
+
+  <script>
+    function calculate() {
+      const palletL = 48, palletW = 40;
+      const palletH = 60; // optional, in inches
+      const len = parseFloat(document.getElementById('length').value);
+      const wid = parseFloat(document.getElementById('width').value);
+      const hgt = parseFloat(document.getElementById('height').value) || null;
+
+      if (!len || !wid) {
+        document.getElementById('result').innerText = "Please enter length and width.";
+        return;
+      }
+
+      let fit1 = Math.floor(palletL / len) * Math.floor(palletW / wid);
+      let fit2 = Math.floor(palletL / wid) * Math.floor(palletW / len);
+      let perLayer = Math.max(fit1, fit2);
+      let total = perLayer;
+
+      if (hgt) {
+        let layers = Math.floor(palletH / hgt);
+        total = perLayer * layers;
+      }
+
+      document.getElementById('result').innerText = 
+        `Boxes per layer: ${perLayer}` + (hgt ? `\nTotal boxes: ${total}` : "");
+    }
+  </script>
+</body>
+</html>
