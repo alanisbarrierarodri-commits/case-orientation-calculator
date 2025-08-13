@@ -9,16 +9,30 @@
     button { width: 100%; padding: 10px; background: #007BFF; color: white; border: none; }
     button:hover { background: #0056b3; }
     .result { margin-top: 15px; font-weight: bold; }
+    small {
+      display: block;
+      color: #555;
+      font-style: italic;
+      font-size: 0.85em;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
   <h2>Pallet Box Calculator</h2>
+
   <label>Length (inches):</label>
+  <small>Longest side of the case</small>
   <input type="number" id="length" step="0.01">
+
   <label>Width (inches):</label>
+  <small>Shortest side of the case</small>
   <input type="number" id="width" step="0.01">
-  <label>Height (inches, optional):</label>
+
+  <label>Height (inches):</label>
+  <small>If the case has “This Side Up” arrows, position it upright before measuring. Height is measured from the base to the top of the box in that orientation.</small>
   <input type="number" id="height" step="0.01">
+
   <button onclick="calculate()">Calculate</button>
   <div class="result" id="result"></div>
 
