@@ -37,8 +37,13 @@
   <div class="result" id="result"></div>
 
   <script>
+    function boxesFit(palletL, palletW, boxL, boxW) {
+      if (boxL > palletL || boxW > palletW) return 0;
+      return Math.floor(palletL / boxL) * Math.floor(palletW / boxW);
+    }
+
     function calculate() {
-      const palletL = 48, palletW = 40, maxHeight = 48; // inches
+      const palletL = 48, palletW = 40, maxHeight = 48;
 
       const len = parseFloat(document.getElementById('length').value);
       const wid = parseFloat(document.getElementById('width').value);
@@ -49,14 +54,11 @@
         return;
       }
 
-      // Option A: length along pallet width
-      let fitA = Math.floor(palletW / len) * Math.floor(palletL / wid);
-      // Option B: width along pallet length
-      let fitB = Math.floor(palletL / wid) * Math.floor(palletW / len);
-      // Option C: length along pallet length
-      let fitC = Math.floor(palletL / len) * Math.floor(palletW / wid);
-      // Option D: width along pallet width
-      let fitD = Math.floor(palletW / wid) * Math.floor(palletL / len);
+      // Calculate boxes for all 4 options
+      let fitA = boxesFit(palletW, palletL, len, wid);  // length along width
+      let fitB = boxesFit(palletL, palletW, wid, len);  // width along length
+      let fitC = boxesFit(palletL, palletW, len, wid);  // length along length
+      let fitD = boxesFit(palletW, palletL, wid, len);  // width along width
 
       let perLayer = Math.max(fitA, fitB, fitC, fitD);
       let layers = hgt ? Math.floor(maxHeight / hgt) : 1;
@@ -68,4 +70,3 @@
   </script>
 </body>
 </html>
-
