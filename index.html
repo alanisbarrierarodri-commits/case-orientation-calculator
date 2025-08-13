@@ -37,35 +37,52 @@
   <div class="result" id="result"></div>
 
   <script>
-    function boxesFit(palletL, palletW, boxL, boxW) {
-      if (boxL > palletL || boxW > palletW) return 0;
-      return Math.floor(palletL / boxL) * Math.floor(palletW / boxW);
-    }
-
     function calculate() {
-      const palletL = 48, palletW = 40, maxHeight = 48;
+      const palletLength = 47; // inches
+      const palletWidth = 40;  // inches
+      const maxHeight = 48;    // inches
 
-      const len = parseFloat(document.getElementById('length').value);
-      const wid = parseFloat(document.getElementById('width').value);
-      const hgt = parseFloat(document.getElementById('height').value) || null;
+      const boxLength = parseFloat(document.getElementById('length').value);
+      const boxWidth = parseFloat(document.getElementById('width').value);
+      const boxHeight = parseFloat(document.getElementById('height').value) || null;
 
-      if (!len || !wid) {
+      if (!boxLength || !boxWidth) {
         document.getElementById('result').innerText = "Please enter length and width.";
         return;
       }
 
-      // Calculate boxes for all 4 options
-      let fitA = boxesFit(palletW, palletL, len, wid);  // length along width
-      let fitB = boxesFit(palletL, palletW, wid, len);  // width along length
-      let fitC = boxesFit(palletL, palletW, len, wid);  // length along length
-      let fitD = boxesFit(palletW, palletL, wid, len);  // width along width
+      // 1. Primary orientation
+      let PA_L = Math.floor(palletLength / boxLength);
+      let PA_W = Math.floor(palletWidth / boxWidth);
+      let PA_T = PA_L * PA_W;
 
-      let perLayer = Math.max(fitA, fitB, fitC, fitD);
-      let layers = hgt ? Math.floor(maxHeight / hgt) : 1;
-      let totalBoxes = perLayer * layers;
+      // 2. Remaining length after primary boxes
+      let usedLength = PA_L * boxLength;
+      let remainingLength = palletLength - usedLength;
 
+      // 3. Rotated boxes in remaining space
+      let Rot_L = Math.floor(remainingLength / boxWidth);
+      let Rot_W = Math.floor(palletWidth / boxLength);
+      let Rot_T = Rot_L * Rot_W;
+
+      // 4. Total per layer
+      let CasesPerLayer = PA_T + Rot_T;
+
+      // 5. Max layers
+      let MaxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
+
+      // 6. Total boxes
+      let TotalCases = CasesPerLayer * MaxLayers;
+
+      // 7. Orientation summary
+      let OrientationText = `Orientation: Primary: ${PA_L} x ${PA_W} cases facing forward.`;
+      if (Rot_L > 0 && Rot_W > 0) {
+        OrientationText += `\nSecondary: ${Rot_L} x ${Rot_W} cases rotated in remaining space.`;
+      }
+
+      // 8. Display results
       document.getElementById('result').innerText =
-        `Max layers: ${layers}\nBoxes per layer: ${perLayer}\nTotal boxes: ${totalBoxes}`;
+        `Max layers: ${MaxLayers}\nBoxes per layer: ${CasesPerLayer}\nTotal boxes: ${TotalCases}\n${OrientationText}`;
     }
   </script>
 </body>
