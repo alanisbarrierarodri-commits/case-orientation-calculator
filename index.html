@@ -7,8 +7,8 @@
     body { font-family: Arial; margin: 20px; max-width: 400px; }
     input { width: 100%; padding: 8px; margin: 5px 0; }
     button { width: 100%; padding: 10px; background: #007BFF; color: white; border: none; }
-    button:hover { background: #0056b3; }
-    .result { margin-top: 15px; font-weight: bold; }
+    button:hover { background: #0056b3; cursor: pointer; }
+    .result { margin-top: 15px; font-weight: bold; white-space: pre-line; }
     small {
       display: block;
       color: #555;
@@ -38,8 +38,8 @@
 
   <script>
     function calculate() {
-      const palletL = 48, palletW = 40;
-      const palletH = 60; // optional, in inches
+      const palletL = 48, palletW = 40, maxHeight = 48; // inches
+
       const len = parseFloat(document.getElementById('length').value);
       const wid = parseFloat(document.getElementById('width').value);
       const hgt = parseFloat(document.getElementById('height').value) || null;
@@ -49,19 +49,23 @@
         return;
       }
 
-      let fit1 = Math.floor(palletL / len) * Math.floor(palletW / wid);
-      let fit2 = Math.floor(palletL / wid) * Math.floor(palletW / len);
-      let perLayer = Math.max(fit1, fit2);
-      let total = perLayer;
+      // Option A: length along pallet width
+      let fitA = Math.floor(palletW / len) * Math.floor(palletL / wid);
+      // Option B: width along pallet length
+      let fitB = Math.floor(palletL / wid) * Math.floor(palletW / len);
+      // Option C: length along pallet length
+      let fitC = Math.floor(palletL / len) * Math.floor(palletW / wid);
+      // Option D: width along pallet width
+      let fitD = Math.floor(palletW / wid) * Math.floor(palletL / len);
 
-      if (hgt) {
-        let layers = Math.floor(palletH / hgt);
-        total = perLayer * layers;
-      }
+      let perLayer = Math.max(fitA, fitB, fitC, fitD);
+      let layers = hgt ? Math.floor(maxHeight / hgt) : 1;
+      let totalBoxes = perLayer * layers;
 
-      document.getElementById('result').innerText = 
-        `Boxes per layer: ${perLayer}` + (hgt ? `\nTotal boxes: ${total}` : "");
+      document.getElementById('result').innerText =
+        `Max layers: ${layers}\nBoxes per layer: ${perLayer}\nTotal boxes: ${totalBoxes}`;
     }
   </script>
 </body>
 </html>
+
