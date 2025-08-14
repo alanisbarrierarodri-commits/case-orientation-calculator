@@ -75,7 +75,6 @@
       font-weight: bold;
       white-space: pre-line;
     }
-
     #pallet-visual, #pallet-3d {
       margin-top: 20px;
       text-align: center;
@@ -92,42 +91,50 @@
       border: 1px solid #aaa;
     }
 
-    /* 3D view */
+    /* 3D view styles */
     #pallet-3d {
-      margin-top: 40px;
-      perspective: 800px;
+      perspective: 1000px;
     }
+
     #pallet-3d .scene {
       display: inline-block;
       transform-style: preserve-3d;
-      transform: rotateX(45deg) rotateZ(45deg);
+      transform: rotateX(40deg) rotateZ(45deg);
       position: relative;
+      margin: 0 auto;
     }
+
     .box3d {
       position: absolute;
       transform-style: preserve-3d;
     }
+
     .box3d .face {
       position: absolute;
       background-color: var(--walmart-yellow);
       border: 1px solid #aaa;
       opacity: 0.95;
     }
-    .face.top {
-      transform: rotateX(90deg);
-      transform-origin: top;
-    }
+
     .face.front {
-      transform: translateZ(0);
+      transform: translateZ(0px);
     }
+
+    .face.top {
+      transform: rotateX(90deg) translateZ(0px);
+      transform-origin: top left;
+    }
+
     .face.side {
-      transform: rotateY(90deg);
-      transform-origin: left;
+      transform: rotateY(90deg) translateZ(0px);
+      transform-origin: top left;
     }
   </style>
 </head>
 <body>
-  <header>SSTK Case Orientation Calculator</header>
+  <header>
+    SSTK Case Orientation Calculator
+  </header>
 
   <div class="container">
     <label>Length (inches):</label>
@@ -143,7 +150,6 @@
     <input type="number" id="height" step="0.01">
 
     <button onclick="calculate()">Calculate</button>
-
     <div class="result" id="result"></div>
 
     <div id="pallet-visual">
@@ -163,14 +169,15 @@
 
       const boxLength = parseFloat(document.getElementById('length').value);
       const boxWidth = parseFloat(document.getElementById('width').value);
-      const boxHeight = parseFloat(document.getElementById('height').value) || 10;
+      const boxHeight = parseFloat(document.getElementById('height').value) || null;
 
       const resultEl = document.getElementById('result');
       const visualEl = document.getElementById('pallet-visual');
       const view3D = document.getElementById('pallet-3d');
 
-      visualEl.innerHTML = '<div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">Top View</div>';
-      view3D.innerHTML = '<div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">3D View</div>';
+      // Clear previous results
+      visualEl.innerHTML = `<div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">Top View</div>`;
+      view3D.innerHTML = `<div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">3D View</div>`;
 
       if (!boxLength || !boxWidth) {
         resultEl.innerText = "Please enter length and width.";
@@ -192,16 +199,17 @@
         bestL = A_L;
         bestW = A_W;
         useOptionA = true;
+        maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
         orientationText = `Each case is placed with its **length** side along the **longest** side of the pallet.`;
       } else {
         bestCount = B_T;
         bestL = B_L;
         bestW = B_W;
         useOptionA = false;
+        maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
         orientationText = `Each case is placed with its **width** side along the **longest** side of the pallet.`;
       }
 
-      maxLayers = Math.floor(maxHeight / boxHeight);
       totalCases = bestCount * maxLayers;
 
       resultEl.innerText =
@@ -210,7 +218,7 @@ Boxes per layer: ${bestCount}
 Total boxes: ${totalCases}
 ${orientationText}`;
 
-      // --- Top View (2D) ---
+      // Top View
       const scale = 4;
       const pallet = document.createElement('div');
       pallet.className = 'pallet';
@@ -234,7 +242,7 @@ ${orientationText}`;
 
       visualEl.appendChild(pallet);
 
-      // --- 3D View ---
+      // 3D View
       const scene = document.createElement('div');
       scene.className = 'scene';
       view3D.appendChild(scene);
@@ -248,32 +256,37 @@ ${orientationText}`;
           for (let j = 0; j < bestW; j++) {
             const box = document.createElement('div');
             box.className = 'box3d';
+            const x = i * w * scale3D;
+            const y = j * d * scale3D;
+            const z = layer * boxHeight * scale3D;
+
             box.style.width = `${w * scale3D}px`;
             box.style.height = `${d * scale3D}px`;
             box.style.transform = `
-              translateX(${i * w * scale3D}px)
-              translateY(${j * d * scale3D}px)
-              translateZ(${-layer * boxHeight * scale3D}px)
+              translateX(${x}px)
+              translateY(${y}px)
+              translateZ(${-z}px)
             `;
 
-            const faceFront = document.createElement('div');
-            faceFront.className = 'face front';
-            faceFront.style.width = '100%';
-            faceFront.style.height = `${boxHeight * scale3D}px`;
+            // Faces
+            const front = document.createElement('div');
+            front.className = 'face front';
+            front.style.width = '100%';
+            front.style.height = `${boxHeight * scale3D}px`;
 
-            const faceTop = document.createElement('div');
-            faceTop.className = 'face top';
-            faceTop.style.width = '100%';
-            faceTop.style.height = `${d * scale3D}px`;
+            const top = document.createElement('div');
+            top.className = 'face top';
+            top.style.width = '100%';
+            top.style.height = `${d * scale3D}px`;
 
-            const faceSide = document.createElement('div');
-            faceSide.className = 'face side';
-            faceSide.style.width = '100%';
-            faceSide.style.height = `${boxHeight * scale3D}px`;
+            const side = document.createElement('div');
+            side.className = 'face side';
+            side.style.width = '100%';
+            side.style.height = `${boxHeight * scale3D}px`;
 
-            box.appendChild(faceFront);
-            box.appendChild(faceTop);
-            box.appendChild(faceSide);
+            box.appendChild(front);
+            box.appendChild(top);
+            box.appendChild(side);
             scene.appendChild(box);
           }
         }
@@ -282,3 +295,5 @@ ${orientationText}`;
   </script>
 </body>
 </html>
+
+
