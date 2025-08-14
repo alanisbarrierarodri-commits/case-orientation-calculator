@@ -4,11 +4,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pallet Box Calculator</title>
   <style>
-    body { font-family: Arial; margin: 20px; max-width: 400px; }
-    input { width: 100%; padding: 8px; margin: 5px 0; }
-    button { width: 100%; padding: 10px; background: #007BFF; color: white; border: none; }
-    button:hover { background: #0056b3; cursor: pointer; }
-    .result { margin-top: 15px; font-weight: bold; white-space: pre-line; }
+    :root {
+      --walmart-blue: #0071ce;
+      --walmart-yellow: #ffc220;
+      --light-gray: #f5f5f5;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: var(--light-gray);
+    }
+    header {
+      background-color: var(--walmart-blue);
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.4em;
+      font-weight: bold;
+      position: relative;
+    }
+    header img {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 28px;
+    }
+    .container {
+      background: white;
+      max-width: 420px;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
     small {
       display: block;
       color: #555;
@@ -16,25 +50,62 @@
       font-size: 0.85em;
       margin-bottom: 4px;
     }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: var(--walmart-yellow);
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #e6ac00;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 12px;
+      background: var(--light-gray);
+      border-left: 5px solid var(--walmart-blue);
+      border-radius: 6px;
+      font-weight: bold;
+      white-space: pre-line;
+    }
   </style>
 </head>
 <body>
-  <h2>Pallet Box Calculator</h2>
+  <header>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Walmart_logo.svg/1280px-Walmart_logo.svg.png" alt="Walmart Logo">
+    Pallet Box Calculator
+  </header>
 
-  <label>Length (inches):</label>
-  <small>Longest side of the case</small>
-  <input type="number" id="length" step="0.01">
+  <div class="container">
+    <label>Length (inches):</label>
+    <small>Longest side of the case</small>
+    <input type="number" id="length" step="0.01">
 
-  <label>Width (inches):</label>
-  <small>Shortest side of the case</small>
-  <input type="number" id="width" step="0.01">
+    <label>Width (inches):</label>
+    <small>Shortest side of the case</small>
+    <input type="number" id="width" step="0.01">
 
-  <label>Height (inches):</label>
-  <small>If the case has “This Side Up” arrows, position it upright before measuring. Height is measured from the base to the top of the box in that orientation.</small>
-  <input type="number" id="height" step="0.01">
+    <label>Height (inches):</label>
+    <small>If the case has “This Side Up” arrows, measure upright from base to top.</small>
+    <input type="number" id="height" step="0.01">
 
-  <button onclick="calculate()">Calculate</button>
-  <div class="result" id="result"></div>
+    <button onclick="calculate()">Calculate</button>
+    <div class="result" id="result"></div>
+  </div>
 
   <script>
     function calculate() {
@@ -51,36 +122,26 @@
         return;
       }
 
-      // 1. Primary orientation
       let PA_L = Math.floor(palletLength / boxLength);
       let PA_W = Math.floor(palletWidth / boxWidth);
       let PA_T = PA_L * PA_W;
 
-      // 2. Remaining length after primary boxes
       let usedLength = PA_L * boxLength;
       let remainingLength = palletLength - usedLength;
 
-      // 3. Rotated boxes in remaining space
       let Rot_L = Math.floor(remainingLength / boxWidth);
       let Rot_W = Math.floor(palletWidth / boxLength);
       let Rot_T = Rot_L * Rot_W;
 
-      // 4. Total per layer
       let CasesPerLayer = PA_T + Rot_T;
-
-      // 5. Max layers
       let MaxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
-
-      // 6. Total boxes
       let TotalCases = CasesPerLayer * MaxLayers;
 
-      // 7. Orientation summary
       let OrientationText = `Orientation: Primary: ${PA_L} x ${PA_W} cases facing forward.`;
       if (Rot_L > 0 && Rot_W > 0) {
         OrientationText += `\nSecondary: ${Rot_L} x ${Rot_W} cases rotated in remaining space.`;
       }
 
-      // 8. Display results
       document.getElementById('result').innerText =
         `Max layers: ${MaxLayers}\nBoxes per layer: ${CasesPerLayer}\nTotal boxes: ${TotalCases}\n${OrientationText}`;
     }
