@@ -82,6 +82,21 @@
       font-weight: bold;
       white-space: pre-line;
     }
+    #pallet-visual {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .pallet {
+      position: relative;
+      margin: 0 auto;
+      background-color: #e6f0fa;
+      border: 2px solid var(--walmart-blue);
+    }
+    .box {
+      position: absolute;
+      background-color: var(--walmart-yellow);
+      border: 1px solid #aaa;
+    }
   </style>
 </head>
 <body>
@@ -104,53 +119,85 @@
 
     <button onclick="calculate()">Calculate</button>
     <div class="result" id="result"></div>
+    <div id="pallet-visual"></div>
   </div>
 
   <script>
     function calculate() {
-      const palletLength = 47; // inches
-      const palletWidth = 40;  // inches
-      const maxHeight = 48;    // inches
+      const palletLength = 47;
+      const palletWidth = 40;
+      const maxHeight = 48;
 
       const boxLength = parseFloat(document.getElementById('length').value);
       const boxWidth = parseFloat(document.getElementById('width').value);
       const boxHeight = parseFloat(document.getElementById('height').value) || null;
 
+      const resultEl = document.getElementById('result');
+      const visualEl = document.getElementById('pallet-visual');
+      visualEl.innerHTML = ''; // clear previous visual
+
       if (!boxLength || !boxWidth) {
-        document.getElementById('result').innerText = "Please enter length and width.";
+        resultEl.innerText = "Please enter length and width.";
         return;
       }
 
-      // --- Option A: Box length along pallet length (47") ---
       const A_L = Math.floor(palletLength / boxLength);
       const A_W = Math.floor(palletWidth / boxWidth);
       const A_T = A_L * A_W;
 
-      // --- Option B: Box width along pallet length (47") ---
       const B_L = Math.floor(palletLength / boxWidth);
       const B_W = Math.floor(palletWidth / boxLength);
       const B_T = B_L * B_W;
 
-      // Choose better orientation
-      let bestCount, maxLayers, totalCases, orientationText;
+      let bestL, bestW, bestCount, maxLayers, totalCases, orientationText, useOptionA;
 
       if (A_T >= B_T) {
         bestCount = A_T;
+        bestL = A_L;
+        bestW = A_W;
+        useOptionA = true;
         maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
-        totalCases = bestCount * maxLayers;
-        orientationText = `Each case is placed with its **length** side along the **47-inch side** of the pallet.`;
+        orientationText = `Each case is placed with its **length** side along the **longest** side of the pallet.`;
       } else {
         bestCount = B_T;
+        bestL = B_L;
+        bestW = B_W;
+        useOptionA = false;
         maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
-        totalCases = bestCount * maxLayers;
-        orientationText = `Each case is placed with its **width** side along the **47-inch side** of the pallet.`;
+        orientationText = `Each case is placed with its **width** side along the **longest** side of the pallet.`;
       }
 
-      document.getElementById('result').innerText =
+      totalCases = bestCount * maxLayers;
+
+      resultEl.innerText =
         `Max layers: ${maxLayers}
 Boxes per layer: ${bestCount}
 Total boxes: ${totalCases}
 ${orientationText}`;
+
+      // --- Create visual representation ---
+      const scale = 4; // pixels per inch
+      const pallet = document.createElement('div');
+      pallet.className = 'pallet';
+      pallet.style.width = `${palletLength * scale}px`;
+      pallet.style.height = `${palletWidth * scale}px`;
+
+      const caseW = useOptionA ? boxLength * scale : boxWidth * scale;
+      const caseH = useOptionA ? boxWidth * scale : boxLength * scale;
+
+      for (let i = 0; i < bestL; i++) {
+        for (let j = 0; j < bestW; j++) {
+          const box = document.createElement('div');
+          box.className = 'box';
+          box.style.width = `${caseW}px`;
+          box.style.height = `${caseH}px`;
+          box.style.left = `${i * caseW}px`;
+          box.style.top = `${j * caseH}px`;
+          pallet.appendChild(box);
+        }
+      }
+
+      visualEl.appendChild(pallet);
     }
   </script>
 </body>
