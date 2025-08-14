@@ -119,7 +119,9 @@
 
     <button onclick="calculate()">Calculate</button>
     <div class="result" id="result"></div>
-    <div id="pallet-visual"></div>
+    <div id="pallet-visual">
+      <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">Top View</div>
+    </div>
   </div>
 
   <script>
@@ -134,7 +136,16 @@
 
       const resultEl = document.getElementById('result');
       const visualEl = document.getElementById('pallet-visual');
-      visualEl.innerHTML = ''; // clear previous visual
+      visualEl.innerHTML = ''; // Clear visual
+
+      const title = document.createElement('div');
+      title.textContent = 'Top View';
+      title.style.fontWeight = 'bold';
+      title.style.fontSize = '1.1em';
+      title.style.marginBottom = '8px';
+      
+      visualEl.appendChild(title);
+
 
       if (!boxLength || !boxWidth) {
         resultEl.innerText = "Please enter length and width.";
