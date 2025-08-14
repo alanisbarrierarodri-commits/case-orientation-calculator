@@ -122,28 +122,36 @@
         return;
       }
 
-      let PA_L = Math.floor(palletLength / boxLength);
-      let PA_W = Math.floor(palletWidth / boxWidth);
-      let PA_T = PA_L * PA_W;
+      // --- Option A: Box length along pallet length (47") ---
+      const A_L = Math.floor(palletLength / boxLength);
+      const A_W = Math.floor(palletWidth / boxWidth);
+      const A_T = A_L * A_W;
 
-      let usedLength = PA_L * boxLength;
-      let remainingLength = palletLength - usedLength;
+      // --- Option B: Box width along pallet length (47") ---
+      const B_L = Math.floor(palletLength / boxWidth);
+      const B_W = Math.floor(palletWidth / boxLength);
+      const B_T = B_L * B_W;
 
-      let Rot_L = Math.floor(remainingLength / boxWidth);
-      let Rot_W = Math.floor(palletWidth / boxLength);
-      let Rot_T = Rot_L * Rot_W;
+      // Choose better orientation
+      let bestCount, maxLayers, totalCases, orientationText;
 
-      let CasesPerLayer = PA_T + Rot_T;
-      let MaxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
-      let TotalCases = CasesPerLayer * MaxLayers;
-
-      let OrientationText = `Orientation: Primary: ${PA_L} x ${PA_W} cases facing forward.`;
-      if (Rot_L > 0 && Rot_W > 0) {
-        OrientationText += `\nSecondary: ${Rot_L} x ${Rot_W} cases rotated in remaining space.`;
+      if (A_T >= B_T) {
+        bestCount = A_T;
+        maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
+        totalCases = bestCount * maxLayers;
+        orientationText = `Each case is placed with its **length** side along the **47-inch side** of the pallet.`;
+      } else {
+        bestCount = B_T;
+        maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
+        totalCases = bestCount * maxLayers;
+        orientationText = `Each case is placed with its **width** side along the **47-inch side** of the pallet.`;
       }
 
       document.getElementById('result').innerText =
-        `Max layers: ${MaxLayers}\nBoxes per layer: ${CasesPerLayer}\nTotal boxes: ${TotalCases}\n${OrientationText}`;
+        `Max layers: ${maxLayers}
+Boxes per layer: ${bestCount}
+Total boxes: ${totalCases}
+${orientationText}`;
     }
   </script>
 </body>
