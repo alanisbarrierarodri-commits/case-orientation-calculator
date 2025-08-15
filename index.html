@@ -30,6 +30,8 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      overflow-y: auto;        /* allows scrolling inside */
+      max-height: 90vh;        /* keeps inside viewport */
     }
     label {
       font-weight: bold;
@@ -95,7 +97,6 @@
     #pallet-3d {
       perspective: 1000px;
     }
-
     #pallet-3d .scene {
       display: inline-block;
       transform-style: preserve-3d;
@@ -103,28 +104,23 @@
       position: relative;
       margin: 0 auto;
     }
-
     .box3d {
       position: absolute;
       transform-style: preserve-3d;
     }
-
     .box3d .face {
       position: absolute;
       background-color: var(--walmart-yellow);
       border: 1px solid #aaa;
       opacity: 0.95;
     }
-
     .face.front {
       transform: translateZ(0px);
     }
-
     .face.top {
       transform: rotateX(90deg) translateZ(0px);
       transform-origin: top left;
     }
-
     .face.side {
       transform: rotateY(90deg) translateZ(0px);
       transform-origin: top left;
@@ -152,12 +148,14 @@
     <button onclick="calculate()">Calculate</button>
     <div class="result" id="result"></div>
 
-    <div id="pallet-visual">
-      <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">Top View</div>
-    </div>
-
-    <div id="pallet-3d">
-      <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">3D View</div>
+    <!-- Hidden until calculation -->
+    <div id="views-container" style="display: none;">
+      <div id="pallet-visual">
+        <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">Top View</div>
+      </div>
+      <div id="pallet-3d">
+        <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">3D View</div>
+      </div>
     </div>
   </div>
 
@@ -174,6 +172,7 @@
       const resultEl = document.getElementById('result');
       const visualEl = document.getElementById('pallet-visual');
       const view3D = document.getElementById('pallet-3d');
+      const viewsContainer = document.getElementById('views-container');
 
       // Clear previous results
       visualEl.innerHTML = `<div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">Top View</div>`;
@@ -181,6 +180,7 @@
 
       if (!boxLength || !boxWidth) {
         resultEl.innerText = "Please enter length and width.";
+        viewsContainer.style.display = 'none';
         return;
       }
 
@@ -218,6 +218,9 @@ Boxes per layer: ${bestCount}
 Total boxes: ${totalCases}
 ${orientationText}`;
 
+      // Show the views
+      viewsContainer.style.display = 'block';
+
       // Top View
       const scale = 4;
       const pallet = document.createElement('div');
@@ -239,7 +242,6 @@ ${orientationText}`;
           pallet.appendChild(box);
         }
       }
-
       visualEl.appendChild(pallet);
 
       // 3D View
@@ -295,5 +297,4 @@ ${orientationText}`;
   </script>
 </body>
 </html>
-
 
