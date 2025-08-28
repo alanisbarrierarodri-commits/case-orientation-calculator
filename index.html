@@ -71,6 +71,12 @@
       font-weight: bold;
       white-space: pre-line;
     }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -81,6 +87,12 @@
     <div id="step1">
       <label>Item #:</label>
       <input type="text" id="itemNumber">
+
+      <div style="text-align: center;">
+        <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/item.png?raw=true" 
+             alt="Item picture">
+      </div>
+
       <button onclick="nextStep(2)">Next</button>
     </div>
 
@@ -89,7 +101,12 @@
       <div style="margin: 15px 0; padding: 10px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 6px;">
         <strong>Before measuring:</strong><br>
         If a measurement falls in between half inches, always round up to the next half inch.<br>
-        Measure the case the way it sits on the pallet.
+        Measure the case the way it sits on the pallet. If you measure the case lying down, but then put it on the pallet standing up, it changes the height of the case.
+      </div>
+
+      <div style="text-align: center;">
+        <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/measurement.png?raw=true" 
+             alt="Measurement guide">
       </div>
 
       <label>Height (inches):</label>
@@ -108,10 +125,15 @@
     <div id="step3" class="hidden">
       <div style="margin: 15px 0; padding: 10px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 6px;">
         <strong>Getting the Ti:</strong><br>
-        Multiply cases across width × length of pallet.
+        In the example shown here, the TI is six. If you do not have enough cases for a full layer, lay the cases along the length and width of the pallet, and then multiply the number of cases long by number of cases wide to get the TI. For example, if you can fit two cases across the width of the pallet and three cases across the length of the pallet, the TI would be six (2 × 3 = 6).
       </div>
 
-      <label>Ti:</label>
+      <div style="text-align: center;">
+        <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/ti.png?raw=true" 
+             alt="TI example">
+      </div>
+
+      <label>Ti (The number of cases in a layer on the pallet):</label>
       <input type="number" id="ti" step="1">
 
       <button onclick="calculate()">Calculate</button>
@@ -119,18 +141,6 @@
 
     <!-- Result -->
     <div class="result hidden" id="result"></div>
-
-    <!-- Pallet visuals (commented out for now) -->
-    <!--
-    <div id="views-container" class="hidden">
-      <div id="pallet-visual">
-        <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">Top View</div>
-      </div>
-      <div id="pallet-3d">
-        <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">3D View</div>
-      </div>
-    </div>
-    -->
   </div>
 
   <script>
@@ -156,4 +166,5 @@ Total boxes: ${totalCases}`;
   </script>
 </body>
 </html>
+
 
