@@ -148,17 +148,18 @@
 </head>
 <body>
   <header>SSTK Case Orientation Calculator</header>
-
+  <!-- First page starts here -->
   <div class="container">
     <label>Item #:</label>
     <input type="text" id="itemNumber">
-
+  
     <div style="text-align: center; margin: 10px 0;">
       <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/item.png?raw=true"
            alt="Item Image"
            style="max-width: 100%; height: auto; border-radius: 8px;">
     </div>
 
+    <!-- Second page starts here -->
     <div style="margin: 15px 0; padding: 10px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 6px; font-size: 0.95em; color: #333;">
       <strong>Before measuring:</strong><br>
       If a measurement falls in between half inches, always round up to the next half inch.<br>
@@ -180,11 +181,12 @@
     <label>Width (inches):</label>
     <input type="number" id="width" step="0.01">
 
+    <!-- Third page starts here -->
     <div style="margin: 15px 0; padding: 10px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 6px; font-size: 0.95em; color: #333;">
       <strong>Getting the Ti:</strong><br>
       In the example shown here, the TI is six. If you do not have enough cases for a full layer, lay the cases along the length and width of the pallet, and then multiply the number of cases long by number of cases wide to get the TI. For example, if you can fit two cases across the width of the pallet and three cases across the length of the pallet, the TI would be six (2 × 3 = 6).
     </div>
-
+  
     <div style="text-align: center; margin: 10px 0;">
       <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/TI.png?raw=true"
            alt="TI Guide"
@@ -194,12 +196,12 @@
     <label>Ti:</label>
     <small>The number of cases in a layer on the pallet.</small>
     <input type="number" id="ti" step="1">
-
+    
     <button onclick="calculate()">Calculate</button>
-
+    
     <div class="result" id="result"></div>
 
-    <!-- Hidden until calculation -->
+    <!-- 4th page starts here: Hidden until calculation -->
     <div id="views-container" style="display: none;">
       <div id="pallet-visual">
         <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">Top View</div>
