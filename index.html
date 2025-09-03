@@ -34,9 +34,7 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
-    .page {
-      display: none;
-    }
+    .page { display: none; }
 
     label {
       font-weight: bold;
@@ -64,11 +62,7 @@
       font-size: 1em;
       transition: background 0.2s;
     }
-
-    button:hover {
-      background: #e6ac00;
-      cursor: pointer;
-    }
+    button:hover { background: #e6ac00; cursor: pointer; }
 
     .result {
       margin-top: 15px;
@@ -80,40 +74,46 @@
       white-space: pre-line;
     }
 
-    /* Pallet visual */
-    .pallet {
-      position: relative;
-      margin: 0 auto;
-      background-color: #e6f0fa;
-      border: 2px solid var(--walmart-blue);
-    }
-    .box {
-      position: absolute;
-      background-color: var(--walmart-yellow);
-      border: 1px solid #aaa;
-    }
-
-    /* 3D view styles */
+    /* 3D view styles - fit inside the white card */
     #pallet-3d {
       perspective: 1000px;
+      margin-top: 10px;
+      background: #f8fbff;
+      border: 1px solid #e1ecf8;
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 260px;
+
+      /* keep it inside the card */
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+
     #pallet-3d .scene {
-      display: inline-block;
       transform-style: preserve-3d;
-      transform: rotateX(40deg) rotateZ(45deg);
+      will-change: transform;
       position: relative;
-      margin: 0 auto;
+      /* width/height set dynamically in JS */
     }
+
     .box3d {
       position: absolute;
       transform-style: preserve-3d;
+      /* left/top set in JS; translateZ set in JS */
     }
+
     .box3d .face {
       position: absolute;
-      background-color: var(--walmart-yellow);
-      border: 1px solid #aaa;
-      opacity: 0.95;
+      border: 1px solid rgba(0,0,0,0.15);
+      backface-visibility: hidden;
     }
+    /* subtle shading so the box looks solid */
+    .face.front, .face.back { background-color: #ffc220; }
+    .face.left, .face.right { background-color: #eab617; }
+    .face.top { background-color: #ffd24d; }
+    .face.bottom { background-color: #e0ad15; }
   </style>
 </head>
 <body>
@@ -148,10 +148,8 @@
       <label>Height (inches):</label>
       <input type="number" id="height" step="0.01">
       <label>Length (inches):</label>
-      <small>Longest side</small>
       <input type="number" id="length" step="0.01">
       <label>Width (inches):</label>
-      <small>Shortest side</small>
       <input type="number" id="width" step="0.01">
 
       <button onclick="prevPage()">Previous</button>
@@ -159,44 +157,41 @@
     </div>
 
     <!-- PAGE 3 -->
-<div class="page" id="page-3">
-  <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
-    <strong>Getting the Ti:</strong><br>
-    Multiply cases across pallet width × length to get TI.
-  </div>
-  <div style="text-align: center; margin: 10px 0;">
-    <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/TI.png?raw=true"
-         alt="TI Guide" style="max-width:100%; border-radius:8px;">
-  </div>
+    <div class="page" id="page-3">
+      <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
+        <strong>Getting the Ti:</strong><br>
+        Multiply cases across pallet width × length to get TI.
+      </div>
+      <div style="text-align: center; margin: 10px 0;">
+        <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/TI.png?raw=true"
+             alt="TI Guide" style="max-width:100%; border-radius:8px;">
+      </div>
 
-  <!-- Keep the TI input -->
-  <label for="ti">Enter TI (cases per layer):</label>
-  <input type="number" id="ti" min="1">
+      <label for="ti">Enter TI (cases per layer):</label>
+      <input type="number" id="ti" min="1">
 
-  <!-- Add multiple slot sizes -->
-  <div style="margin-top:15px;">
-    <label>Select Slot Sizes (choose one or more):</label>
-    <div id="slot-options">
-      <label><input type="checkbox" value="30"> 30"</label><br>
-      <label><input type="checkbox" value="40"> 40"</label><br>
-      <label><input type="checkbox" value="50"> 50"</label><br>
-      <label><input type="checkbox" value="60"> 60"</label><br>
-      <label><input type="checkbox" value="71"> 71"</label><br>
-      <label><input type="checkbox" value="73"> 73"</label><br>
-      <label><input type="checkbox" value="75"> 75"</label><br>
-      <label><input type="checkbox" value="110"> 110"</label><br>
+      <div style="margin-top:15px;">
+        <label>Select Slot Sizes (choose one or more):</label>
+        <div id="slot-options">
+          <label><input type="checkbox" value="30"> 30"</label><br>
+          <label><input type="checkbox" value="40"> 40"</label><br>
+          <label><input type="checkbox" value="50"> 50"</label><br>
+          <label><input type="checkbox" value="60"> 60"</label><br>
+          <label><input type="checkbox" value="71"> 71"</label><br>
+          <label><input type="checkbox" value="73"> 73"</label><br>
+          <label><input type="checkbox" value="75"> 75"</label><br>
+          <label><input type="checkbox" value="110"> 110"</label><br>
+        </div>
+      </div>
+
+      <button onclick="prevPage()">Previous</button>
+      <button onclick="calculate()">Calculate</button>
     </div>
-  </div>
-
-  <button onclick="prevPage()">Previous</button>
-  <button onclick="calculate()">Calculate</button>
-</div>
 
     <!-- PAGE 4 -->
     <div class="page" id="page-4">
       <div class="result" id="result"></div>
       <div id="views-container">
-        <div id="pallet-visual"></div>
         <div id="pallet-3d"></div>
       </div>
       <button onclick="prevPage()">Previous</button>
@@ -204,135 +199,211 @@
   </div>
 
   <script>
-  let currentPage = 1;
-  showPage(currentPage);
+    let currentPage = 1;
+    showPage(currentPage);
 
-  function showPage(n) {
-    document.querySelectorAll('.page').forEach((p, i) => {
-      p.style.display = (i + 1 === n) ? 'block' : 'none';
-    });
-    currentPage = n;
-  }
-
-  function nextPage() { showPage(currentPage + 1); }
-  function prevPage() { showPage(currentPage - 1); }
-
-  function calculate() {
-    const palletLength = 47;
-    const palletWidth = 40;
-
-    const boxLength = parseFloat(document.getElementById('length').value);
-    const boxWidth = parseFloat(document.getElementById('width').value);
-    const boxHeight = parseFloat(document.getElementById('height').value);
-    const tiInput = parseInt(document.getElementById('ti').value);
-
-    const resultEl = document.getElementById('result');
-    const view3D = document.getElementById('pallet-3d');
-
-    view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
-
-    if (!boxLength || !boxWidth || !boxHeight) {
-      resultEl.innerText = "Please enter length, width, and height.";
-      showPage(4);
-      return;
+    function showPage(n) {
+      document.querySelectorAll('.page').forEach((p, i) => {
+        p.style.display = (i + 1 === n) ? 'block' : 'none';
+      });
+      currentPage = n;
     }
+    function nextPage() { showPage(currentPage + 1); }
+    function prevPage() { showPage(currentPage - 1); }
 
-    const slotSizes = Array.from(document.querySelectorAll('#slot-options input:checked'))
-      .map(cb => parseInt(cb.value));
+    function calculate() {
+      const palletLength = 47;
+      const palletWidth = 40;
 
-    if (slotSizes.length === 0) {
-      resultEl.innerText = "Please select at least one slot size.";
-      showPage(4);
-      return;
-    }
+      const boxLength = parseFloat(document.getElementById('length').value);
+      const boxWidth = parseFloat(document.getElementById('width').value);
+      const boxHeight = parseFloat(document.getElementById('height').value);
+      const tiInput = parseInt(document.getElementById('ti').value);
 
-    let allResults = "";
-    let lastCalc = null; // keep last result for visuals
+      const resultEl = document.getElementById('result');
+      const view3D = document.getElementById('pallet-3d');
 
-    slotSizes.forEach(maxHeight => {
-      const A_L = Math.floor(palletLength / boxLength);
-      const A_W = Math.floor(palletWidth / boxWidth);
-      const A_T = A_L * A_W;
+      view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
 
-      const B_L = Math.floor(palletLength / boxWidth);
-      const B_W = Math.floor(palletWidth / boxLength);
-      const B_T = B_L * B_W;
-
-      let bestL, bestW, bestCount, maxLayers, orientationText, useOptionA;
-
-      if (A_T >= B_T) {
-        bestCount = A_T;
-        bestL = A_L;
-        bestW = A_W;
-        useOptionA = true;
-        maxLayers = Math.floor(maxHeight / boxHeight);
-        orientationText = "Case longest side aligned with pallet's longest side.";
-      } else {
-        bestCount = B_T;
-        bestL = B_L;
-        bestW = B_W;
-        useOptionA = false;
-        maxLayers = Math.floor(maxHeight / boxHeight);
-        orientationText = "Case shortest side aligned with pallet's longest side.";
+      if (!boxLength || !boxWidth || !boxHeight) {
+        resultEl.innerText = "Please enter length, width, and height.";
+        showPage(4);
+        return;
       }
 
-      const totalCases = bestCount * maxLayers;
+      const slotSizes = Array.from(document.querySelectorAll('#slot-options input:checked'))
+        .map(cb => parseInt(cb.value));
 
-      allResults += `\n=== Slot Size: ${maxHeight}" ===
+      if (slotSizes.length === 0) {
+        resultEl.innerText = "Please select at least one slot size.";
+        showPage(4);
+        return;
+      }
+
+      let allResults = "";
+      let lastCalc = null;
+
+      slotSizes.forEach(maxHeight => {
+        // Try both orientations and take the better TI:
+        const A_L = Math.floor(palletLength / boxLength);
+        const A_W = Math.floor(palletWidth / boxWidth);
+        const A_T = A_L * A_W;
+
+        const B_L = Math.floor(palletLength / boxWidth);
+        const B_W = Math.floor(palletWidth / boxLength);
+        const B_T = B_L * B_W;
+
+        let bestL, bestW, bestCount, maxLayers, orientationText, useOptionA;
+
+        if (A_T >= B_T) {
+          bestCount = A_T;
+          bestL = A_L;
+          bestW = A_W;
+          useOptionA = true;
+          orientationText = "Each case is placed lengthwise along the pallet.";
+        } else {
+          bestCount = B_T;
+          bestL = B_L;
+          bestW = B_W;
+          useOptionA = false;
+          orientationText = "Each case is placed widthwise along the pallet.";
+        }
+
+        maxLayers = Math.floor(maxHeight / boxHeight);
+        const totalCases = bestCount * maxLayers;
+
+        allResults += `\n=== Slot Size: ${maxHeight}" ===
 Max layers: ${maxLayers}
 Boxes per layer: ${bestCount}
 Total boxes: ${totalCases}
-Orientation: ${orientationText}\n`;
+${orientationText}\n`;
 
-      lastCalc = { bestL, bestW, useOptionA, maxLayers, boxLength, boxWidth, boxHeight };
-    });
+        lastCalc = { bestL, bestW, useOptionA, maxLayers, boxLength, boxWidth, boxHeight };
+      });
 
-    resultEl.innerText = allResults.trim();
+      resultEl.innerText = allResults.trim();
 
-    if (lastCalc) {
-      draw3D(lastCalc);
+      if (lastCalc) {
+        draw3D(lastCalc);
+      }
+
+      showPage(4);
     }
 
-    showPage(4);
-  }
+    function draw3D(calc) {
+      const view3D = document.getElementById('pallet-3d');
+      view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
 
-function draw3D(calc) {
-    const view3D = document.getElementById('pallet-3d');
-    view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
+      const { bestL, bestW, useOptionA, boxLength, boxWidth, boxHeight, maxLayers } = calc;
 
-    const { bestL, bestW, useOptionA, boxLength, boxWidth, boxHeight, maxLayers } = calc;
+      // Dimensions in pixels (scaling factor)
+      const unit = 3; // adjust if you want bigger/smaller
+      const W = (useOptionA ? boxLength : boxWidth) * unit; // X-size
+      const D = (useOptionA ? boxWidth  : boxLength) * unit; // Y-size (depth)
+      const H = boxHeight * unit;                              // Z-size (height)
 
-    const scene = document.createElement('div');
-    scene.className = 'scene';
-    view3D.appendChild(scene);
+      // Create scene; we’ll scale it to fit inside the card
+      const scene = document.createElement('div');
+      scene.className = 'scene';
 
-    const w = useOptionA ? boxLength : boxWidth;
-    const d = useOptionA ? boxWidth : boxLength;
-    const scale3D = 3;
+      // Logical footprint
+      const sceneW = bestL * W;
+      const sceneD = bestW * D;
 
-    for (let layer = 0; layer < maxLayers; layer++) {
-      for (let i = 0; i < bestL; i++) {
-        for (let j = 0; j < bestW; j++) {
-          const box = document.createElement('div');
-          box.className = 'box3d';
-          const x = i * w * scale3D;
-          const y = j * d * scale3D;
-          const z = layer * boxHeight * scale3D;
-          box.style.width = `${w * scale3D}px`;
-          box.style.height = `${d * scale3D}px`;
-          box.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${-z}px)`;
+      // Size the scene to its unrotated footprint
+      scene.style.width = `${sceneW}px`;
+      scene.style.height = `${sceneD}px`;
 
-          const front = document.createElement('div');
-          front.className = 'face front';
-          front.style.width = '100%';
-          front.style.height = `${boxHeight * scale3D}px`;
-          box.appendChild(front);
+      // Compute a fit scale so the rotated scene stays inside the card
+      const cardInnerWidth = view3D.clientWidth - 20; // padding allow
+      // 1.5 is a safe fudge factor because rotation expands bounds
+      const fitScale = Math.min(1, cardInnerWidth / (Math.max(sceneW, sceneD) * 1.5));
 
-          scene.appendChild(box);
+      // Apply rotation + scale (centered)
+      scene.style.transform = `scale(${fitScale}) rotateX(40deg) rotateZ(45deg)`;
+      scene.style.transformOrigin = 'center center';
+
+      // Build the boxes (complete 6 faces)
+      for (let layer = 0; layer < maxLayers; layer++) {
+        for (let i = 0; i < bestL; i++) {
+          for (let j = 0; j < bestW; j++) {
+            const x = i * W;
+            const y = j * D;
+            const z = layer * H;
+
+            const box = makeCuboid(W, D, H);
+            box.style.left = `${x}px`;
+            box.style.top = `${y}px`;
+            box.style.transform = `translateZ(${-z}px)`; // build upward (negative Z moves "back")
+            scene.appendChild(box);
+          }
         }
       }
+
+      view3D.appendChild(scene);
     }
-  }
+
+    // Create a cuboid with 6 faces (W: width X, D: depth Y, H: height Z)
+    function makeCuboid(W, D, H) {
+      const box = document.createElement('div');
+      box.className = 'box3d';
+      box.style.width = `${W}px`;
+      box.style.height = `${D}px`;
+
+      // FRONT (W x H)
+      const front = document.createElement('div');
+      front.className = 'face front';
+      front.style.width = `${W}px`;
+      front.style.height = `${H}px`;
+      front.style.transform = `translateZ(${D/2}px)`;
+      box.appendChild(front);
+
+      // BACK (W x H)
+      const back = document.createElement('div');
+      back.className = 'face back';
+      back.style.width = `${W}px`;
+      back.style.height = `${H}px`;
+      back.style.transform = `rotateY(180deg) translateZ(${D/2}px)`;
+      box.appendChild(back);
+
+      // RIGHT (D x H)
+      const right = document.createElement('div');
+      right.className = 'face right';
+      right.style.width = `${D}px`;
+      right.style.height = `${H}px`;
+      right.style.transform = `rotateY(90deg) translateZ(${W/2}px)`;
+      box.appendChild(right);
+
+      // LEFT (D x H)
+      const left = document.createElement('div');
+      left.className = 'face left';
+      left.style.width = `${D}px`;
+      left.style.height = `${H}px`;
+      left.style.transform = `rotateY(-90deg) translateZ(${W/2}px)`;
+      box.appendChild(left);
+
+      // TOP (W x D)
+      const top = document.createElement('div');
+      top.className = 'face top';
+      top.style.width = `${W}px`;
+      top.style.height = `${D}px`;
+      top.style.transform = `rotateX(90deg) translateZ(${H/2}px)`;
+      box.appendChild(top);
+
+      // BOTTOM (W x D)
+      const bottom = document.createElement('div');
+      bottom.className = 'face bottom';
+      bottom.style.width = `${W}px`;
+      bottom.style.height = `${D}px`;
+      bottom.style.transform = `rotateX(-90deg) translateZ(${H/2}px)`;
+      box.appendChild(bottom);
+
+      return box;
+    }
+  </script>
+</body>
+</html>
+
 
 </script>
 </body>
