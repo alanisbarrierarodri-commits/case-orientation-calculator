@@ -225,10 +225,8 @@
     const tiInput = parseInt(document.getElementById('ti').value);
 
     const resultEl = document.getElementById('result');
-    const visualEl = document.getElementById('pallet-visual');
     const view3D = document.getElementById('pallet-3d');
 
-    visualEl.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">Top View</div>`;
     view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
 
     if (!boxLength || !boxWidth || !boxHeight) {
@@ -296,43 +294,12 @@ ${orientationText}\n`;
     showPage(4);
   }
 
-  function drawVisuals(calc) {
-    const palletLength = 47;
-    const palletWidth = 40;
-
-    const visualEl = document.getElementById('pallet-visual');
+function draw3D(calc) {
     const view3D = document.getElementById('pallet-3d');
-
-    // Clear old
-    visualEl.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">Top View</div>`;
     view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
 
     const { bestL, bestW, useOptionA, boxLength, boxWidth, boxHeight, maxLayers } = calc;
 
-    // Top View
-    const scale = 4;
-    const pallet = document.createElement('div');
-    pallet.className = 'pallet';
-    pallet.style.width = `${palletLength * scale}px`;
-    pallet.style.height = `${palletWidth * scale}px`;
-
-    const caseW = useOptionA ? boxLength * scale : boxWidth * scale;
-    const caseH = useOptionA ? boxWidth * scale : boxLength * scale;
-
-    for (let i = 0; i < bestL; i++) {
-      for (let j = 0; j < bestW; j++) {
-        const box = document.createElement('div');
-        box.className = 'box';
-        box.style.width = `${caseW}px`;
-        box.style.height = `${caseH}px`;
-        box.style.left = `${i * caseW}px`;
-        box.style.top = `${j * caseH}px`;
-        pallet.appendChild(box);
-      }
-    }
-    visualEl.appendChild(pallet);
-
-    // 3D View
     const scene = document.createElement('div');
     scene.className = 'scene';
     view3D.appendChild(scene);
@@ -352,16 +319,19 @@ ${orientationText}\n`;
           box.style.width = `${w * scale3D}px`;
           box.style.height = `${d * scale3D}px`;
           box.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${-z}px)`;
+
           const front = document.createElement('div');
           front.className = 'face front';
           front.style.width = '100%';
           front.style.height = `${boxHeight * scale3D}px`;
           box.appendChild(front);
+
           scene.appendChild(box);
         }
       }
     }
   }
+
 </script>
 </body>
 </html>
