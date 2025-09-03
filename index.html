@@ -148,8 +148,10 @@
       <label>Height (inches):</label>
       <input type="number" id="height" step="0.01">
       <label>Length (inches):</label>
+      <small>Longest side</small>
       <input type="number" id="length" step="0.01">
       <label>Width (inches):</label>
+      <small>Shortest side</small>
       <input type="number" id="width" step="0.01">
 
       <button onclick="prevPage()">Previous</button>
@@ -264,14 +266,14 @@
         bestW = A_W;
         useOptionA = true;
         maxLayers = Math.floor(maxHeight / boxHeight);
-        orientationText = "Each case is placed lengthwise along the pallet.";
+        orientationText = "Case longest side aligned with pallet's longest side.";
       } else {
         bestCount = B_T;
         bestL = B_L;
         bestW = B_W;
         useOptionA = false;
         maxLayers = Math.floor(maxHeight / boxHeight);
-        orientationText = "Each case is placed widthwise along the pallet.";
+        orientationText = "Case shortest side aligned with pallet's longest side.";
       }
 
       const totalCases = bestCount * maxLayers;
@@ -280,7 +282,7 @@
 Max layers: ${maxLayers}
 Boxes per layer: ${bestCount}
 Total boxes: ${totalCases}
-${orientationText}\n`;
+Orientation: ${orientationText}\n`;
 
       lastCalc = { bestL, bestW, useOptionA, maxLayers, boxLength, boxWidth, boxHeight };
     });
