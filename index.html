@@ -213,16 +213,16 @@
     }
     function nextPage() { showPage(currentPage + 1); }
     function prevPage() { showPage(currentPage - 1); }
-
+<script>
     function calculate() {
       const palletLength = 47;
       const palletWidth = 40;
-      const maxHeight = 48;
-
+  
       const boxLength = parseFloat(document.getElementById('length').value);
       const boxWidth = parseFloat(document.getElementById('width').value);
       const boxHeight = parseFloat(document.getElementById('height').value) || null;
-
+      const tiInput = parseInt(document.getElementById('ti').value);
+      
       const resultEl = document.getElementById('result');
       const visualEl = document.getElementById('pallet-visual');
       const view3D = document.getElementById('pallet-3d');
@@ -231,11 +231,23 @@
       view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
 
       if (!boxLength || !boxWidth) {
-        resultEl.innerText = "Please enter length and width.";
+        resultEl.innerText = "Please enter length, width, and height.";
         showPage(4);
         return;
       }
 
+      const slotSizes = Array.from(document.querySelectorAll('#slot-options input:checked'))
+      .map(cb => parseInt(cb.value));
+
+      if (slotSizes.length === 0) {
+      resultEl.innerText = "Please select at least one slot size.";
+      showPage(4);
+      return;
+     }
+
+      let allResults = "";
+      
+      slotSizes.forEach(maxHeight => {
       const A_L = Math.floor(palletLength / boxLength);
       const A_W = Math.floor(palletWidth / boxWidth);
       const A_T = A_L * A_W;
@@ -251,23 +263,27 @@
         bestL = A_L;
         bestW = A_W;
         useOptionA = true;
-        maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
+        maxLayers = Math.floor(maxHeight / boxHeight);
         orientationText = "Each case is placed lengthwise along the pallet.";
       } else {
         bestCount = B_T;
         bestL = B_L;
         bestW = B_W;
         useOptionA = false;
-        maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
+        maxLayers = Math.floor(maxHeight / boxHeight);
         orientationText = "Each case is placed widthwise along the pallet.";
       }
 
       totalCases = bestCount * maxLayers;
 
-      resultEl.innerText = `Max layers: ${maxLayers}
+      allResults += `\n=== Slot Size: ${maxHeight}" ===
+Max layers: ${maxLayers}
 Boxes per layer: ${bestCount}
 Total boxes: ${totalCases}
-${orientationText}`;
+${orientationText}\n`;
+    });
+
+      resultEl.innerText = allResults.trim();
 
       // Top View
       const scale = 4;
