@@ -148,8 +148,10 @@
       <label>Height (inches):</label>
       <input type="number" id="height" step="0.01">
       <label>Length (inches):</label>
+      <small>Longest side</small>
       <input type="number" id="length" step="0.01">
       <label>Width (inches):</label>
+      <small>Shortest side</small>
       <input type="number" id="width" step="0.01">
 
       <button onclick="prevPage()">Previous</button>
@@ -167,13 +169,12 @@
          alt="TI Guide" style="max-width:100%; border-radius:8px;">
   </div>
 
-  <!-- Keep the TI input -->
   <label for="ti">Enter TI (cases per layer):</label>
   <input type="number" id="ti" min="1">
 
   <!-- Add multiple slot sizes -->
   <div style="margin-top:15px;">
-    <label>Select Slot Sizes (choose one or more):</label>
+    <label>Select Prime Slot Sizes (choose one or more):</label>
     <div id="slot-options">
       <label><input type="checkbox" value="30"> 30"</label><br>
       <label><input type="checkbox" value="40"> 40"</label><br>
@@ -217,11 +218,14 @@
     function calculate() {
       const palletLength = 47;
       const palletWidth = 40;
-      const maxHeight = 48;
 
       const boxLength = parseFloat(document.getElementById('length').value);
       const boxWidth = parseFloat(document.getElementById('width').value);
       const boxHeight = parseFloat(document.getElementById('height').value) || null;
+      const ti = parseInt(document.getElementById("ti").value);
+
+      const selectedSlots = Array.from(document.querySelectorAll('#slot-options input:checked'))
+                             .map(cb => parseInt(cb.value));
 
       const resultEl = document.getElementById('result');
       const visualEl = document.getElementById('pallet-visual');
@@ -236,10 +240,26 @@
         return;
       }
 
+      if (isNaN(ti) || ti <= 0) {
+        resultEl.innerText = "Please enter a valid TI value.";
+        showPage(4);
+        return;
+      }
+
+      if (selectedSlots.length === 0) {
+        resultEl.innerText = "Please select at least one slot size.";
+        showPage(4);
+        return;
+      }
+
+    let resultsText = "";
+
+
+    selectedSlots.forEach(slotHeight => {
       const A_L = Math.floor(palletLength / boxLength);
       const A_W = Math.floor(palletWidth / boxWidth);
       const A_T = A_L * A_W;
-
+        
       const B_L = Math.floor(palletLength / boxWidth);
       const B_W = Math.floor(palletWidth / boxLength);
       const B_T = B_L * B_W;
@@ -252,14 +272,14 @@
         bestW = A_W;
         useOptionA = true;
         maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
-        orientationText = "Each case is placed lengthwise along the pallet.";
+        orientationText = "Each case is placed with its longest side aligned with the pallet's longest side.";
       } else {
         bestCount = B_T;
         bestL = B_L;
         bestW = B_W;
         useOptionA = false;
         maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
-        orientationText = "Each case is placed widthwise along the pallet.";
+        orientationText = "Each case is placed with its shortest side aligned with the pallet's longest side.";
       }
 
       totalCases = bestCount * maxLayers;
