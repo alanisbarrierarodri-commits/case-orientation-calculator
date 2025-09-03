@@ -23,7 +23,6 @@
       text-align: center;
       font-size: 1.4em;
       font-weight: bold;
-      position: relative;
     }
 
     .container {
@@ -33,22 +32,16 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      overflow-y: auto; /* allows scrolling inside */
-      max-height: 90vh;  /* keeps inside viewport */
+    }
+
+    .page {
+      display: none;
     }
 
     label {
       font-weight: bold;
       display: block;
       margin-top: 10px;
-    }
-
-    small {
-      display: block;
-      color: #555;
-      font-style: italic;
-      font-size: 0.85em;
-      margin-bottom: 4px;
     }
 
     input {
@@ -61,14 +54,14 @@
     }
 
     button {
-      width: 100%;
-      padding: 12px;
+      padding: 10px 16px;
+      margin: 8px 4px 0 0;
       background: var(--walmart-yellow);
       color: black;
       font-weight: bold;
       border: none;
       border-radius: 8px;
-      font-size: 1.1em;
+      font-size: 1em;
       transition: background 0.2s;
     }
 
@@ -87,19 +80,13 @@
       white-space: pre-line;
     }
 
-    #pallet-visual,
-    #pallet-3d {
-      margin-top: 20px;
-      text-align: center;
-    }
-
+    /* Pallet visual */
     .pallet {
       position: relative;
       margin: 0 auto;
       background-color: #e6f0fa;
       border: 2px solid var(--walmart-blue);
     }
-
     .box {
       position: absolute;
       background-color: var(--walmart-yellow);
@@ -110,7 +97,6 @@
     #pallet-3d {
       perspective: 1000px;
     }
-
     #pallet-3d .scene {
       display: inline-block;
       transform-style: preserve-3d;
@@ -118,101 +104,100 @@
       position: relative;
       margin: 0 auto;
     }
-
     .box3d {
       position: absolute;
       transform-style: preserve-3d;
     }
-
     .box3d .face {
       position: absolute;
       background-color: var(--walmart-yellow);
       border: 1px solid #aaa;
       opacity: 0.95;
     }
-
-    .face.front {
-      transform: translateZ(0px);
-    }
-
-    .face.top {
-      transform: rotateX(90deg) translateZ(0px);
-      transform-origin: top left;
-    }
-
-    .face.side {
-      transform: rotateY(90deg) translateZ(0px);
-      transform-origin: top left;
-    }
   </style>
 </head>
 <body>
   <header>SSTK Case Orientation Calculator</header>
-  <!-- First page starts here -->
+
   <div class="container">
-    <label>Item #:</label>
-    <input type="text" id="itemNumber">
+    <!-- PAGE 1 -->
+    <div class="page" id="page-1">
+      <label>Item #:</label>
+      <input type="text" id="itemNumber">
   
-    <div style="text-align: center; margin: 10px 0;">
-      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/item.png?raw=true"
-           alt="Item Image"
-           style="max-width: 100%; height: auto; border-radius: 8px;">
-    </div>
-
-    <!-- Second page starts here -->
-    <div style="margin: 15px 0; padding: 10px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 6px; font-size: 0.95em; color: #333;">
-      <strong>Before measuring:</strong><br>
-      If a measurement falls in between half inches, always round up to the next half inch.<br>
-      Measure the case the way it sits on the pallet. If you measure the case lying down, but then put it on the pallet standing up, it changes the height of the case.
-    </div>
-
-    <div style="text-align: center; margin: 10px 0;">
-      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/measurement.png?raw=true"
-           alt="Measurement Guide"
-           style="max-width: 100%; height: auto; border-radius: 8px;">
-    </div>
-
-    <label>Height (inches):</label>
-    <input type="number" id="height" step="0.01">
-
-    <label>Length (inches):</label>
-    <input type="number" id="length" step="0.01">
-
-    <label>Width (inches):</label>
-    <input type="number" id="width" step="0.01">
-
-    <!-- Third page starts here -->
-    <div style="margin: 15px 0; padding: 10px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 6px; font-size: 0.95em; color: #333;">
-      <strong>Getting the Ti:</strong><br>
-      In the example shown here, the TI is six. If you do not have enough cases for a full layer, lay the cases along the length and width of the pallet, and then multiply the number of cases long by number of cases wide to get the TI. For example, if you can fit two cases across the width of the pallet and three cases across the length of the pallet, the TI would be six (2 × 3 = 6).
-    </div>
-  
-    <div style="text-align: center; margin: 10px 0;">
-      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/TI.png?raw=true"
-           alt="TI Guide"
-           style="max-width: 100%; height: auto; border-radius: 8px;">
-    </div>
-    
-    <label>Ti:</label>
-    <small>The number of cases in a layer on the pallet.</small>
-    <input type="number" id="ti" step="1">
-    
-    <button onclick="calculate()">Calculate</button>
-    
-    <div class="result" id="result"></div>
-
-    <!-- 4th page starts here: Hidden until calculation -->
-    <div id="views-container" style="display: none;">
-      <div id="pallet-visual">
-        <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">Top View</div>
+      <div style="text-align: center; margin: 10px 0;">
+        <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/item.png?raw=true"
+             alt="Item Image" style="max-width:100%; border-radius:8px;">
       </div>
-      <div id="pallet-3d">
-        <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">3D View</div>
+
+      <button onclick="nextPage()">Next</button>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="page" id="page-2">
+      <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
+        <strong>Before measuring:</strong><br>
+        If a measurement falls in between half inches, always round up to the next half inch.<br>
+        Measure the case the way it sits on the pallet.
       </div>
+      <div style="text-align: center; margin: 10px 0;">
+        <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/measurement.png?raw=true"
+             alt="Measurement Guide" style="max-width:100%; border-radius:8px;">
+      </div>
+
+      <label>Height (inches):</label>
+      <input type="number" id="height" step="0.01">
+      <label>Length (inches):</label>
+      <input type="number" id="length" step="0.01">
+      <label>Width (inches):</label>
+      <input type="number" id="width" step="0.01">
+
+      <button onclick="prevPage()">Previous</button>
+      <button onclick="nextPage()">Next</button>
+    </div>
+
+    <!-- PAGE 3 -->
+    <div class="page" id="page-3">
+      <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
+        <strong>Getting the Ti:</strong><br>
+        Multiply cases across pallet width × length to get TI.
+      </div>
+      <div style="text-align: center; margin: 10px 0;">
+        <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/TI.png?raw=true"
+             alt="TI Guide" style="max-width:100%; border-radius:8px;">
+      </div>
+
+      <label>Ti:</label>
+      <input type="number" id="ti" step="1">
+
+      <button onclick="prevPage()">Previous</button>
+      <button onclick="calculate()">Calculate</button>
+    </div>
+
+    <!-- PAGE 4 -->
+    <div class="page" id="page-4">
+      <div class="result" id="result"></div>
+      <div id="views-container">
+        <div id="pallet-visual"></div>
+        <div id="pallet-3d"></div>
+      </div>
+      <button onclick="prevPage()">Previous</button>
     </div>
   </div>
 
   <script>
+    let currentPage = 1;
+    showPage(currentPage);
+
+    function showPage(n) {
+      document.querySelectorAll('.page').forEach((p, i) => {
+        p.style.display = (i+1 === n) ? 'block' : 'none';
+      });
+      currentPage = n;
+    }
+    function nextPage() { showPage(currentPage + 1); }
+    function prevPage() { showPage(currentPage - 1); }
+
     function calculate() {
       const palletLength = 47;
       const palletWidth = 40;
@@ -225,15 +210,13 @@
       const resultEl = document.getElementById('result');
       const visualEl = document.getElementById('pallet-visual');
       const view3D = document.getElementById('pallet-3d');
-      const viewsContainer = document.getElementById('views-container');
 
-      // Clear previous results
-      visualEl.innerHTML = `<div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">Top View</div>`;
-      view3D.innerHTML = `<div style="font-weight: bold; font-size: 1.1em; margin-bottom: 8px;">3D View</div>`;
+      visualEl.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">Top View</div>`;
+      view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
 
       if (!boxLength || !boxWidth) {
         resultEl.innerText = "Please enter length and width.";
-        viewsContainer.style.display = 'none';
+        showPage(4);
         return;
       }
 
@@ -253,14 +236,14 @@
         bestW = A_W;
         useOptionA = true;
         maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
-        orientationText = "Each case is placed with its length side along the longest side of the pallet.";
+        orientationText = "Each case is placed lengthwise along the pallet.";
       } else {
         bestCount = B_T;
         bestL = B_L;
         bestW = B_W;
         useOptionA = false;
         maxLayers = boxHeight ? Math.floor(maxHeight / boxHeight) : 1;
-        orientationText = "Each case is placed with its width side along the longest side of the pallet.";
+        orientationText = "Each case is placed widthwise along the pallet.";
       }
 
       totalCases = bestCount * maxLayers;
@@ -269,9 +252,6 @@
 Boxes per layer: ${bestCount}
 Total boxes: ${totalCases}
 ${orientationText}`;
-
-      // Show the views
-      viewsContainer.style.display = 'block';
 
       // Top View
       const scale = 4;
@@ -294,7 +274,6 @@ ${orientationText}`;
           pallet.appendChild(box);
         }
       }
-
       visualEl.appendChild(pallet);
 
       // 3D View
@@ -311,38 +290,23 @@ ${orientationText}`;
           for (let j = 0; j < bestW; j++) {
             const box = document.createElement('div');
             box.className = 'box3d';
-
             const x = i * w * scale3D;
             const y = j * d * scale3D;
             const z = layer * boxHeight * scale3D;
-
             box.style.width = `${w * scale3D}px`;
             box.style.height = `${d * scale3D}px`;
             box.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${-z}px)`;
-
-            // Faces
             const front = document.createElement('div');
             front.className = 'face front';
             front.style.width = '100%';
             front.style.height = `${boxHeight * scale3D}px`;
-
-            const top = document.createElement('div');
-            top.className = 'face top';
-            top.style.width = '100%';
-            top.style.height = `${d * scale3D}px`;
-
-            const side = document.createElement('div');
-            side.className = 'face side';
-            side.style.width = '100%';
-            side.style.height = `${boxHeight * scale3D}px`;
-
             box.appendChild(front);
-            box.appendChild(top);
-            box.appendChild(side);
             scene.appendChild(box);
           }
         }
       }
+
+      showPage(4);
     }
   </script>
 </body>
