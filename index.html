@@ -297,7 +297,7 @@ ${orientationText}\n`;
       const { bestL, bestW, useOptionA, boxLength, boxWidth, boxHeight, maxLayers } = calc;
 
       // Dimensions in pixels (scaling factor)
-      const unit = 3; // adjust if you want bigger/smaller
+      const unit = 10; // adjust if you want bigger/smaller
       const W = (useOptionA ? boxLength : boxWidth) * unit; // X-size
       const D = (useOptionA ? boxWidth  : boxLength) * unit; // Y-size (depth)
       const H = boxHeight * unit;                              // Z-size (height)
@@ -315,9 +315,9 @@ ${orientationText}\n`;
       scene.style.height = `${sceneD}px`;
 
       // Compute a fit scale so the rotated scene stays inside the card
-      const cardInnerWidth = view3D.clientWidth - 20; // padding allow
+      const cardInnerWidth = view3D.clientWidth - 40; // padding allow
       // 1.5 is a safe fudge factor because rotation expands bounds
-      const fitScale = Math.min(1, cardInnerWidth / (Math.max(sceneW, sceneD) * 1.5));
+      const fitScale = Math.min(1, cardInnerWidth / Math.max(sceneW, sceneD));
 
       // Apply rotation + scale (centered)
       scene.style.transform = `scale(${fitScale}) rotateX(40deg) rotateZ(45deg)`;
