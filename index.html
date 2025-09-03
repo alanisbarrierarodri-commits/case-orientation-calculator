@@ -202,52 +202,54 @@
   </div>
 
   <script>
-    let currentPage = 1;
-    showPage(currentPage);
+  let currentPage = 1;
+  showPage(currentPage);
 
-    function showPage(n) {
-      document.querySelectorAll('.page').forEach((p, i) => {
-        p.style.display = (i+1 === n) ? 'block' : 'none';
-      });
-      currentPage = n;
+  function showPage(n) {
+    document.querySelectorAll('.page').forEach((p, i) => {
+      p.style.display = (i + 1 === n) ? 'block' : 'none';
+    });
+    currentPage = n;
+  }
+
+  function nextPage() { showPage(currentPage + 1); }
+  function prevPage() { showPage(currentPage - 1); }
+
+  function calculate() {
+    const palletLength = 47;
+    const palletWidth = 40;
+
+    const boxLength = parseFloat(document.getElementById('length').value);
+    const boxWidth = parseFloat(document.getElementById('width').value);
+    const boxHeight = parseFloat(document.getElementById('height').value);
+    const tiInput = parseInt(document.getElementById('ti').value);
+
+    const resultEl = document.getElementById('result');
+    const visualEl = document.getElementById('pallet-visual');
+    const view3D = document.getElementById('pallet-3d');
+
+    visualEl.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">Top View</div>`;
+    view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
+
+    if (!boxLength || !boxWidth || !boxHeight) {
+      resultEl.innerText = "Please enter length, width, and height.";
+      showPage(4);
+      return;
     }
-    function nextPage() { showPage(currentPage + 1); }
-    function prevPage() { showPage(currentPage - 1); }
-    
-    function calculate() {
-      const palletLength = 47;
-      const palletWidth = 40;
-  
-      const boxLength = parseFloat(document.getElementById('length').value);
-      const boxWidth = parseFloat(document.getElementById('width').value);
-      const boxHeight = parseFloat(document.getElementById('height').value) || null;
-      const tiInput = parseInt(document.getElementById('ti').value);
-      
-      const resultEl = document.getElementById('result');
-      const visualEl = document.getElementById('pallet-visual');
-      const view3D = document.getElementById('pallet-3d');
 
-      visualEl.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">Top View</div>`;
-      view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
-
-      if (!boxLength || !boxWidth) {
-        resultEl.innerText = "Please enter length, width, and height.";
-        showPage(4);
-        return;
-      }
-
-      const slotSizes = Array.from(document.querySelectorAll('#slot-options input:checked'))
+    const slotSizes = Array.from(document.querySelectorAll('#slot-options input:checked'))
       .map(cb => parseInt(cb.value));
 
-      if (slotSizes.length === 0) {
+    if (slotSizes.length === 0) {
       resultEl.innerText = "Please select at least one slot size.";
       showPage(4);
       return;
-     }
+    }
 
-      let allResults = "";
-      
-      slotSizes.forEach(maxHeight => {
+    let allResults = "";
+    let lastCalc = null; // keep last result for visuals
+
+    slotSizes.forEach(maxHeight => {
       const A_L = Math.floor(palletLength / boxLength);
       const A_W = Math.floor(palletWidth / boxWidth);
       const A_T = A_L * A_W;
@@ -256,7 +258,7 @@
       const B_W = Math.floor(palletWidth / boxLength);
       const B_T = B_L * B_W;
 
-      let bestL, bestW, bestCount, maxLayers, totalCases, orientationText, useOptionA;
+      let bestL, bestW, bestCount, maxLayers, orientationText, useOptionA;
 
       if (A_T >= B_T) {
         bestCount = A_T;
@@ -274,72 +276,92 @@
         orientationText = "Each case is placed widthwise along the pallet.";
       }
 
-      totalCases = bestCount * maxLayers;
+      const totalCases = bestCount * maxLayers;
 
       allResults += `\n=== Slot Size: ${maxHeight}" ===
 Max layers: ${maxLayers}
 Boxes per layer: ${bestCount}
 Total boxes: ${totalCases}
 ${orientationText}\n`;
+
+      lastCalc = { bestL, bestW, useOptionA, maxLayers, boxLength, boxWidth, boxHeight };
     });
 
-      resultEl.innerText = allResults.trim();
+    resultEl.innerText = allResults.trim();
 
-      // Top View
-      const scale = 4;
-      const pallet = document.createElement('div');
-      pallet.className = 'pallet';
-      pallet.style.width = `${palletLength * scale}px`;
-      pallet.style.height = `${palletWidth * scale}px`;
+    if (lastCalc) {
+      drawVisuals(lastCalc);
+    }
 
-      const caseW = useOptionA ? boxLength * scale : boxWidth * scale;
-      const caseH = useOptionA ? boxWidth * scale : boxLength * scale;
+    showPage(4);
+  }
 
+  function drawVisuals(calc) {
+    const palletLength = 47;
+    const palletWidth = 40;
+
+    const visualEl = document.getElementById('pallet-visual');
+    const view3D = document.getElementById('pallet-3d');
+
+    // Clear old
+    visualEl.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">Top View</div>`;
+    view3D.innerHTML = `<div style="font-weight:bold; margin-bottom:8px;">3D View</div>`;
+
+    const { bestL, bestW, useOptionA, boxLength, boxWidth, boxHeight, maxLayers } = calc;
+
+    // Top View
+    const scale = 4;
+    const pallet = document.createElement('div');
+    pallet.className = 'pallet';
+    pallet.style.width = `${palletLength * scale}px`;
+    pallet.style.height = `${palletWidth * scale}px`;
+
+    const caseW = useOptionA ? boxLength * scale : boxWidth * scale;
+    const caseH = useOptionA ? boxWidth * scale : boxLength * scale;
+
+    for (let i = 0; i < bestL; i++) {
+      for (let j = 0; j < bestW; j++) {
+        const box = document.createElement('div');
+        box.className = 'box';
+        box.style.width = `${caseW}px`;
+        box.style.height = `${caseH}px`;
+        box.style.left = `${i * caseW}px`;
+        box.style.top = `${j * caseH}px`;
+        pallet.appendChild(box);
+      }
+    }
+    visualEl.appendChild(pallet);
+
+    // 3D View
+    const scene = document.createElement('div');
+    scene.className = 'scene';
+    view3D.appendChild(scene);
+
+    const w = useOptionA ? boxLength : boxWidth;
+    const d = useOptionA ? boxWidth : boxLength;
+    const scale3D = 3;
+
+    for (let layer = 0; layer < maxLayers; layer++) {
       for (let i = 0; i < bestL; i++) {
         for (let j = 0; j < bestW; j++) {
           const box = document.createElement('div');
-          box.className = 'box';
-          box.style.width = `${caseW}px`;
-          box.style.height = `${caseH}px`;
-          box.style.left = `${i * caseW}px`;
-          box.style.top = `${j * caseH}px`;
-          pallet.appendChild(box);
+          box.className = 'box3d';
+          const x = i * w * scale3D;
+          const y = j * d * scale3D;
+          const z = layer * boxHeight * scale3D;
+          box.style.width = `${w * scale3D}px`;
+          box.style.height = `${d * scale3D}px`;
+          box.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${-z}px)`;
+          const front = document.createElement('div');
+          front.className = 'face front';
+          front.style.width = '100%';
+          front.style.height = `${boxHeight * scale3D}px`;
+          box.appendChild(front);
+          scene.appendChild(box);
         }
       }
-      visualEl.appendChild(pallet);
-
-      // 3D View
-      const scene = document.createElement('div');
-      scene.className = 'scene';
-      view3D.appendChild(scene);
-
-      const w = useOptionA ? boxLength : boxWidth;
-      const d = useOptionA ? boxWidth : boxLength;
-      const scale3D = 3;
-
-      for (let layer = 0; layer < maxLayers; layer++) {
-        for (let i = 0; i < bestL; i++) {
-          for (let j = 0; j < bestW; j++) {
-            const box = document.createElement('div');
-            box.className = 'box3d';
-            const x = i * w * scale3D;
-            const y = j * d * scale3D;
-            const z = layer * boxHeight * scale3D;
-            box.style.width = `${w * scale3D}px`;
-            box.style.height = `${d * scale3D}px`;
-            box.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${-z}px)`;
-            const front = document.createElement('div');
-            front.className = 'face front';
-            front.style.width = '100%';
-            front.style.height = `${boxHeight * scale3D}px`;
-            box.appendChild(front);
-            scene.appendChild(box);
-          }
-        }
-      }
-
-      showPage(4);
     }
-  </script>
+  }
+</script>
 </body>
 </html>
