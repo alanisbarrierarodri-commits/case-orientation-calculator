@@ -224,6 +224,7 @@ function calculate() {
     let fitL_A = Math.floor(palletLength / boxLength);
     let fitW_A = Math.floor(palletWidth / boxWidth);
     let ti_A = fitL_A * fitW_A;
+
     let fitL_B = Math.floor(palletLength / boxWidth);
     let fitW_B = Math.floor(palletWidth / boxLength);
     let ti_B = fitL_B * fitW_B;
@@ -233,6 +234,11 @@ function calculate() {
     let hi = Math.floor(slotHeight / boxHeight);
     let total = ti * hi;
 
+    // orientation text
+    let orientationText = useOptionA
+      ? "Each case is placed with its longest side aligned with the pallet’s longest side."
+      : "Each case is placed with its shortest side aligned with the pallet’s longest side.";
+
     const card = document.createElement('div');
     card.className = "result-card";
     card.innerHTML = `
@@ -241,6 +247,9 @@ function calculate() {
         <span>TI: <span class="highlight">${ti}</span></span>
         <span>HI: <span class="highlight">${hi}</span></span>
         <span>Total: <span class="highlight">${total}</span></span>
+      </div>
+      <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:6px; font-size:0.9em;">
+        ${orientationText}
       </div>
       <div class="view-container">
         <div class="view"><strong>Top View</strong><br/></div>
@@ -264,7 +273,7 @@ function calculate() {
 
   showPage(4);
 }
-
+  
 function draw2D(calc) {
   const { bestL, bestW, boxLength, boxWidth, boxHeight, maxLayers, useOptionA, topCanvas, frontCanvas } = calc;
   const palletLength = 47, palletWidth = 40;
