@@ -270,11 +270,15 @@ function sendToQA() {
   fetch("http://127.0.0.1:5000/submit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(results)
-  })
+    body: JSON.stringify({
+        associateId: document.getElementById("associateId").value,
+        errorType: document.getElementById("errorType").value,
+        comment: document.getElementById("comment").value
+    })
+})
   .then(res => res.json())
-  .then(data => {
-    alert("Sent to QA!");
+    .then(data => {
+    alert(data.message || "Sent to QA!");  // backend decides message
   })
   .catch(err => {
     console.error(err);
