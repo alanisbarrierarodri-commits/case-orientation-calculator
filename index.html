@@ -124,8 +124,8 @@
 <header>SSTK Case Orientation Calculator</header>
 <div class="container">
 
-  <!-- PAGE 1 -->
-  <div class="page" id="page-1">
+  <!-- PAGE 1 (visible by default) -->
+  <div class="page" id="page-1" style="display:block;">
     <label for="itemNumber">Item #:</label>
     <input type="text" id="itemNumber">
     <div style="text-align: center; margin: 10px 0;">
@@ -190,7 +190,6 @@
 
 <script>
 let currentPage = 1;
-showPage(currentPage);
 
 function showPage(n) {
   document.querySelectorAll('.page').forEach((p, i) => {
