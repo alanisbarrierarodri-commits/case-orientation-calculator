@@ -65,7 +65,6 @@
   }
   button:hover { background: #e6ac00; cursor: pointer; }
 
-  /* Results scroll */
   .results-container {
     margin-top: 10px;
     display: flex;
@@ -199,6 +198,7 @@ function showPage(n) {
   });
   currentPage = n;
 }
+
 function nextPage() { showPage(currentPage + 1); }
 function prevPage() { showPage(currentPage - 1); }
 
@@ -258,17 +258,25 @@ function calculate() {
   showPage(4);
 }
 
-// NEW FUNCTION – sends results to Flask backend
+// Send data to Flask backend
 function sendToQA() {
-  const itemNumber = document.getElementById("itemNumber").value;
+  const itemNumber = document.getElementById("itemNumber").value.trim();
+  if (!itemNumber) {
+    alert("Please enter an Item Number.");
+    return;
+  }
 
-  // collect all results from page 4
   const results = [...document.querySelectorAll('.result-card')].map(card => ({
     slotSize: card.dataset.slot,
     ti: parseInt(card.dataset.ti),
     hi: parseInt(card.dataset.hi),
     total: parseInt(card.dataset.total)
   }));
+
+  if (results.length === 0) {
+    alert("No results to send. Please calculate first.");
+    return;
+  }
 
   fetch("http://127.0.0.1:5000/submit", {
     method: "POST",
@@ -290,4 +298,3 @@ function sendToQA() {
 </script>
 </body>
 </html>
-
