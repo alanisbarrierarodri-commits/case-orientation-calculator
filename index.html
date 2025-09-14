@@ -184,6 +184,7 @@
   <div class="page" id="page-4">
     <div class="results-container" id="results"></div>
     <button onclick="prevPage()">Previous</button>
+    <button onclick="sendToQA()">Send to QA</button>
   </div>
 
 </div>
@@ -236,7 +237,6 @@ function calculate() {
     let hi = Math.floor(slotHeight / boxHeight);
     let total = ti * hi;
 
-    // orientation text
     let orientationText = useOptionA
       ? "Each case is placed with its longest side aligned with the pallet’s longest side."
       : "Each case is placed with its shortest side aligned with the pallet’s longest side.";
@@ -275,7 +275,7 @@ function calculate() {
 
   showPage(4);
 }
-  
+
 function draw2D(calc) {
   const { bestL, bestW, boxLength, boxWidth, boxHeight, maxLayers, useOptionA, topCanvas, frontCanvas } = calc;
   const palletLength = 47, palletWidth = 40;
@@ -319,6 +319,11 @@ function draw2D(calc) {
       frontCtx.strokeRect(i * boxL2, frontCanvas.height - (layer + 1) * boxH, boxL2, boxH);
     }
   }
+}
+
+// NEW FUNCTION
+function sendToQA() {
+  alert("Sent to QA!");
 }
 </script>
 </body>
