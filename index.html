@@ -126,7 +126,7 @@
 
   <!-- PAGE 1 -->
   <div class="page" id="page-1">
-    <label>Item #:</label>
+    <label for="itemNumber">Item #:</label>
     <input type="text" id="itemNumber">
     <div style="text-align: center; margin: 10px 0;">
       <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/item.png?raw=true"
@@ -139,9 +139,9 @@
   <div class="page" id="page-2">
     <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
       <strong>Before measuring:</strong><br>
-    • If a measurement falls in between half inches, always round up.<br>
-    • Measure the case the way it sits on the pallet.<br>
-    • If the case has <strong>upright arrows</strong>, place it in the upright position before measuring.
+      • If a measurement falls in between half inches, always round up.<br>
+      • Measure the case the way it sits on the pallet.<br>
+      • If the case has <strong>upright arrows</strong>, place it in the upright position before measuring.
     </div>
     <div style="text-align: center; margin: 10px 0;">
       <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/measurement.png?raw=true"
@@ -151,12 +151,12 @@
       <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/upright.jpg?raw=true"
            alt="Upright Position" style="max-width:100%; border-radius:8px;">
     </div>
-    <label>Height (inches):</label>
+    <label for="height">Height (inches):</label>
     <input type="number" id="height" step="0.01">
-    <label>Length (inches):</label>
+    <label for="length">Length (inches):</label>
     <small>Longest side</small>
     <input type="number" id="length" step="0.01">
-    <label>Width (inches):</label>
+    <label for="width">Width (inches):</label>
     <small>Shortest side</small>
     <input type="number" id="width" step="0.01">
     <button onclick="prevPage()">Previous</button>
@@ -211,8 +211,9 @@ function calculate() {
   const resultsContainer = document.getElementById('results');
   resultsContainer.innerHTML = "";
 
-  if (!boxLength || !boxWidth || !boxHeight) {
-    resultsContainer.innerHTML = "<div class='result-card'>Please enter length, width, and height.</div>";
+  if (isNaN(boxLength) || isNaN(boxWidth) || isNaN(boxHeight) ||
+      boxLength <= 0 || boxWidth <= 0 || boxHeight <= 0) {
+    resultsContainer.innerHTML = "<div class='result-card'>Please enter valid positive numbers for length, width, and height.</div>";
     showPage(4);
     return;
   }
@@ -243,7 +244,7 @@ function calculate() {
 
     const card = document.createElement('div');
     card.className = "result-card";
-    card.innerHTML = 
+    card.innerHTML = `
       <div class="result-header">Slot Size: ${slotHeight}"</div>
       <div class="result-metrics">
         <span>TI: <span class="highlight">${ti}</span></span>
@@ -257,7 +258,7 @@ function calculate() {
         <div class="view"><strong>Top View</strong><br/></div>
         <div class="view"><strong>Front View</strong><br/></div>
       </div>
-    ;
+    `;
     resultsContainer.appendChild(card);
 
     const topCanvas = document.createElement('canvas');
