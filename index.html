@@ -1,3 +1,4 @@
+You said:
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,6 +66,7 @@
   }
   button:hover { background: #e6ac00; cursor: pointer; }
 
+  /* Results scroll */
   .results-container {
     margin-top: 10px;
     display: flex;
@@ -183,7 +185,6 @@
   <div class="page" id="page-4">
     <div class="results-container" id="results"></div>
     <button onclick="prevPage()">Previous</button>
-    <button onclick="sendToQA()">Send to QA</button>
   </div>
 
 </div>
@@ -198,7 +199,6 @@ function showPage(n) {
   });
   currentPage = n;
 }
-
 function nextPage() { showPage(currentPage + 1); }
 function prevPage() { showPage(currentPage - 1); }
 
@@ -237,63 +237,89 @@ function calculate() {
     let hi = Math.floor(slotHeight / boxHeight);
     let total = ti * hi;
 
+    // orientation text
+    let orientationText = useOptionA
+      ? "Each case is placed with its longest side aligned with the pallet’s longest side."
+      : "Each case is placed with its shortest side aligned with the pallet’s longest side.";
+
     const card = document.createElement('div');
     card.className = "result-card";
-    card.dataset.slot = slotHeight;
-    card.dataset.ti = ti;
-    card.dataset.hi = hi;
-    card.dataset.total = total;
-
-    card.innerHTML = `
+    card.innerHTML = 
       <div class="result-header">Slot Size: ${slotHeight}"</div>
       <div class="result-metrics">
         <span>TI: <span class="highlight">${ti}</span></span>
         <span>HI: <span class="highlight">${hi}</span></span>
         <span>Total: <span class="highlight">${total}</span></span>
       </div>
-    `;
+      <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:6px; font-size:0.9em;">
+        ${orientationText}
+      </div>
+      <div class="view-container">
+        <div class="view"><strong>Top View</strong><br/></div>
+        <div class="view"><strong>Front View</strong><br/></div>
+      </div>
+    ;
     resultsContainer.appendChild(card);
+
+    const topCanvas = document.createElement('canvas');
+    const frontCanvas = document.createElement('canvas');
+    card.querySelectorAll('.view')[0].appendChild(topCanvas);
+    card.querySelectorAll('.view')[1].appendChild(frontCanvas);
+
+    draw2D({
+      bestL: useOptionA ? fitL_A : fitL_B,
+      bestW: useOptionA ? fitW_A : fitW_B,
+      boxLength, boxWidth, boxHeight, maxLayers: hi,
+      useOptionA, topCanvas, frontCanvas
+    });
   });
 
   showPage(4);
 }
+  
+function draw2D(calc) {
+  const { bestL, bestW, boxLength, boxWidth, boxHeight, maxLayers, useOptionA, topCanvas, frontCanvas } = calc;
+  const palletLength = 47, palletWidth = 40;
+  const scale = 200 / Math.max(palletLength, palletWidth);
 
-// Send data to Flask backend
-function sendToQA() {
-  const itemNumber = document.getElementById("itemNumber").value.trim();
-  if (!itemNumber) {
-    alert("Please enter an Item Number.");
-    return;
+  // Top View
+  topCanvas.width = palletLength * scale;
+  topCanvas.height = palletWidth * scale;
+  const topCtx = topCanvas.getContext('2d');
+  topCtx.strokeStyle = "#0071ce";
+  topCtx.strokeRect(0, 0, topCanvas.width, topCanvas.height);
+
+  const boxL = (useOptionA ? boxLength : boxWidth) * scale;
+  const boxW = (useOptionA ? boxWidth : boxLength) * scale;
+  for (let i = 0; i < bestL; i++) {
+    for (let j = 0; j < bestW; j++) {
+      topCtx.fillStyle = "#ffc220";
+      topCtx.strokeStyle = "#333";
+      topCtx.fillRect(i * boxL, j * boxW, boxL, boxW);
+      topCtx.strokeRect(i * boxL, j * boxW, boxL, boxW);
+    }
   }
 
-  const results = [...document.querySelectorAll('.result-card')].map(card => ({
-    slotSize: card.dataset.slot,
-    ti: parseInt(card.dataset.ti),
-    hi: parseInt(card.dataset.hi),
-    total: parseInt(card.dataset.total)
-  }));
+  // Front View
+  frontCanvas.width = palletLength * scale;
+  frontCanvas.height = (boxHeight * maxLayers) * (scale / 2);
+  const frontCtx = frontCanvas.getContext('2d');
+  frontCtx.strokeStyle = "#0071ce";
+  frontCtx.beginPath();
+  frontCtx.moveTo(0, frontCanvas.height - 2);
+  frontCtx.lineTo(frontCanvas.width, frontCanvas.height - 2);
+  frontCtx.stroke();
 
-  if (results.length === 0) {
-    alert("No results to send. Please calculate first.");
-    return;
+  const boxL2 = (useOptionA ? boxLength : boxWidth) * scale;
+  const boxH = boxHeight * (scale / 2);
+  for (let layer = 0; layer < maxLayers; layer++) {
+    for (let i = 0; i < bestL; i++) {
+      frontCtx.fillStyle = "#ffc220";
+      frontCtx.strokeStyle = "#333";
+      frontCtx.fillRect(i * boxL2, frontCanvas.height - (layer + 1) * boxH, boxL2, boxH);
+      frontCtx.strokeRect(i * boxL2, frontCanvas.height - (layer + 1) * boxH, boxL2, boxH);
+    }
   }
-
-  fetch("http://127.0.0.1:5000/submit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      item: itemNumber,
-      slots: results
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    alert(data.message || "Sent to QA!");
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Error sending to QA.");
-  });
 }
 </script>
 </body>
