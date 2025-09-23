@@ -32,11 +32,7 @@ header {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 .page { display: none; }
-label {
-  font-weight: bold;
-  display: block;
-  margin-top: 10px;
-}
+label { font-weight: bold; display: block; margin-top: 10px; }
 input {
   width: 100%;
   padding: 10px;
@@ -56,11 +52,7 @@ button {
   font-size: 1em;
   transition: background 0.2s;
 }
-button:hover {
-  background: #e6ac00;
-  cursor: pointer;
-}
-/* Results scroll */
+button:hover { background: #e6ac00; cursor: pointer; }
 .results-container {
   margin-top: 10px;
   display: flex;
@@ -113,148 +105,126 @@ canvas { display:block; max-width:100%; height:auto; }
 <header>SSTK Case Orientation Calculator</header>
 
 <div class="container">
-
-<!-- PAGE 1 -->
-<div class="page" id="page-1" style="display:block;">
-  <label for="itemNumber">Item #:</label>
-  <input type="text" id="itemNumber">
-  <div style="text-align: center; margin: 10px 0;">
-    <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/item.png?raw=true" alt="Item Image" style="max-width:100%; border-radius:8px;">
+  <!-- PAGE 1 -->
+  <div class="page" id="page-1" style="display:block;">
+    <label for="itemNumber">Item #:</label>
+    <input type="text" id="itemNumber">
+    <div style="text-align:center;margin:10px 0;">
+      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/item.png?raw=true"
+           alt="Item Image" style="max-width:100%;border-radius:8px;">
+    </div>
+    <button onclick="nextPage()">Next</button>
   </div>
-  <button onclick="nextPage()">Next</button>
-</div>
 
-<!-- PAGE 2 -->
-<div class="page" id="page-2">
-  <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
-    <strong>Before measuring:</strong><br>
-    • If a measurement falls in between half inches, always round up.<br>
-    • Measure the case the way it sits on the pallet.<br>
-    • If the case has <strong>upright arrows</strong>, place it in the upright position before measuring.
+  <!-- PAGE 2 -->
+  <div class="page" id="page-2">
+    <div style="margin:15px 0;padding:10px;background:#fff3cd;border-left:5px solid #ffc107;">
+      <strong>Before measuring:</strong><br>
+      • If a measurement falls in between half inches, always round up.<br>
+      • Measure the case the way it sits on the pallet.<br>
+      • If the case has <strong>upright arrows</strong>, place it in the upright position before measuring.
+    </div>
+    <div style="text-align:center;margin:10px 0;">
+      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/measurement.png?raw=true"
+           alt="Measurement Guide" style="max-width:100%;border-radius:8px;">
+    </div>
+    <div style="text-align:center;margin:10px 0;">
+      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/upright.jpg?raw=true"
+           alt="Upright Position" style="max-width:100%;border-radius:8px;">
+    </div>
+    <label for="height">Height (inches):</label>
+    <input type="number" id="height" step="0.01">
+    <label for="length">Length (inches):</label>
+    <small>Longest side</small>
+    <input type="number" id="length" step="0.01">
+    <label for="width">Width (inches):</label>
+    <small>Shortest side</small>
+    <input type="number" id="width" step="0.01">
+    <button onclick="prevPage()">Previous</button>
+    <button onclick="nextPage()">Next</button>
   </div>
-  <div style="text-align: center; margin: 10px 0;">
-    <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/measurement.png?raw=true" alt="Measurement Guide" style="max-width:100%; border-radius:8px;">
-  </div>
-  <div style="text-align: center; margin: 10px 0;">
-    <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/upright.jpg?raw=true" alt="Upright Position" style="max-width:100%; border-radius:8px;">
-  </div>
-  <label for="height">Height (inches):</label>
-  <input type="number" id="height" step="0.01">
-  <label for="length">Length (inches):</label>
-  <small>Longest side</small>
-  <input type="number" id="length" step="0.01">
-  <label for="width">Width (inches):</label>
-  <small>Shortest side</small>
-  <input type="number" id="width" step="0.01">
-  <button onclick="prevPage()">Previous</button>
-  <button onclick="nextPage()">Next</button>
-</div>
 
-<!-- PAGE 3 -->
-<div class="page" id="page-3">
-  <label>Select Slot Sizes (choose one or more):</label>
-  <div id="slot-options">
-    <label><input type="checkbox" value="30"> 30"</label><br>
-    <label><input type="checkbox" value="40"> 40"</label><br>
-    <label><input type="checkbox" value="50"> 50"</label><br>
-    <label><input type="checkbox" value="60"> 60"</label><br>
-    <label><input type="checkbox" value="71"> 71"</label><br>
-    <label><input type="checkbox" value="73"> 73"</label><br>
-    <label><input type="checkbox" value="75"> 75"</label><br>
-    <label><input type="checkbox" value="110"> 110"</label><br>
+  <!-- PAGE 3 -->
+  <div class="page" id="page-3">
+    <label>Select Slot Sizes (choose one or more):</label>
+    <div id="slot-options">
+      <label><input type="checkbox" value="30"> 30"</label><br>
+      <label><input type="checkbox" value="40"> 40"</label><br>
+      <label><input type="checkbox" value="50"> 50"</label><br>
+      <label><input type="checkbox" value="60"> 60"</label><br>
+      <label><input type="checkbox" value="71"> 71"</label><br>
+      <label><input type="checkbox" value="73"> 73"</label><br>
+      <label><input type="checkbox" value="75"> 75"</label><br>
+      <label><input type="checkbox" value="110"> 110"</label><br>
+    </div>
+    <button onclick="prevPage()">Previous</button>
+    <button onclick="calculate()">Calculate</button>
   </div>
-  <button onclick="prevPage()">Previous</button>
-  <button onclick="calculate()">Calculate</button>
-</div>
 
-<!-- PAGE 4 -->
-<div class="page" id="page-4">
-  <div class="results-container" id="results"></div>
-  <button onclick="prevPage()">Previous</button>
-</div>
-
+  <!-- PAGE 4 -->
+  <div class="page" id="page-4">
+    <div class="results-container" id="results"></div>
+    <button onclick="prevPage()">Previous</button>
+  </div>
 </div>
 
 <script>
 let currentPage = 1;
 function showPage(n){
   document.querySelectorAll('.page').forEach((p,i)=>{
-    p.style.display=(i+1===n)?'block':'none';
+    p.style.display = (i+1===n)?'block':'none';
   });
-  currentPage=n;
+  currentPage = n;
 }
 function nextPage(){ showPage(Math.min(currentPage+1,4)); }
 function prevPage(){ showPage(Math.max(currentPage-1,1)); }
 
-/* ---------- Simplified packing and drawing (your existing algorithm here) ---------- */
-/* NOTE: All your existing packLayer / mergeFreeRects / calculate logic remains the same.
-   Only drawPacked() is modified below to include pallet side labels. */
+// Simple packing: just compute TI/HI, not actual layout
+function calculate(){
+  const boxL = parseFloat(document.getElementById('length').value);
+  const boxW = parseFloat(document.getElementById('width').value);
+  const boxH = parseFloat(document.getElementById('height').value);
+  const palletL = 47, palletW = 40;
+  const slotSizes = [...document.querySelectorAll('#slot-options input:checked')].map(el=>parseInt(el.value));
+  const results = document.getElementById('results');
+  results.innerHTML = "";
 
-function drawPacked(params){
-  const { layers, palletLength, palletWidth, boxLength, boxWidth,
-          boxHeight, maxLayers, topCanvas, frontCanvas } = params;
-
-  const maxDim = Math.max(palletLength, palletWidth);
-  const scale = 300 / maxDim;
-
-  // TOP VIEW
-  topCanvas.width = palletLength * scale;
-  topCanvas.height = palletWidth * scale;
-  const tctx = topCanvas.getContext('2d');
-  tctx.clearRect(0,0,topCanvas.width,topCanvas.height);
-  tctx.strokeStyle = "#0071ce";
-  tctx.lineWidth = 2;
-  tctx.strokeRect(0,0,topCanvas.width,topCanvas.height);
-
-  // 🔵 ADDED: pallet side labels
-  tctx.fillStyle = "#000";
-  tctx.font = "14px Arial";
-  tctx.textAlign = "center";
-  tctx.fillText("Pallet Longest Side", topCanvas.width/2, 16);
-  tctx.save();
-  tctx.translate(14, topCanvas.height/2);
-  tctx.rotate(-Math.PI/2);
-  tctx.fillText("Pallet Shortest Side", 0, 0);
-  tctx.restore();
-
-  if (layers.length>0 && layers[0].length>0){
-    layers[0].forEach(p=>{
-      const px=p.x*scale, py=p.y*scale, pw=p.w*scale, ph=p.h*scale;
-      tctx.fillStyle="#ffc220";
-      tctx.fillRect(px,py,pw,ph);
-      tctx.strokeStyle="#333";
-      tctx.strokeRect(px,py,pw,ph);
-    });
+  if(isNaN(boxL)||isNaN(boxW)||isNaN(boxH)){
+    results.innerHTML = "<div class='result-card'>Enter valid dimensions.</div>";
+    showPage(4);
+    return;
+  }
+  if(slotSizes.length===0){
+    results.innerHTML = "<div class='result-card'>Select at least one slot size.</div>";
+    showPage(4);
+    return;
   }
 
-  // FRONT VIEW (unchanged example)
-  const verticalScale = scale/2;
-  frontCanvas.width = palletLength * scale;
-  frontCanvas.height = Math.max(80, boxHeight * maxLayers * verticalScale);
-  const fctx = frontCanvas.getContext('2d');
-  fctx.clearRect(0,0,frontCanvas.width,frontCanvas.height);
-  fctx.strokeStyle = "#0071ce";
-  fctx.beginPath();
-  fctx.moveTo(0, frontCanvas.height - 2);
-  fctx.lineTo(frontCanvas.width, frontCanvas.height - 2);
-  fctx.stroke();
-  layers.forEach((layer,idx)=>{
-    const yTop = frontCanvas.height - (idx+1)*boxHeight*verticalScale;
-    layer.forEach(p=>{
-      const px=p.x*scale, pw=p.w*scale, ph=boxHeight*verticalScale;
-      fctx.fillStyle="#ffc220";
-      fctx.fillRect(px,yTop,pw,ph);
-      fctx.strokeStyle="#333";
-      fctx.strokeRect(px,yTop,pw,ph);
-    });
+  slotSizes.forEach(slot=>{
+    const hi = Math.floor(slot / boxH);
+    const ti = Math.floor(palletL / boxL) * Math.floor(palletW / boxW);
+    const total = hi * ti;
+    const card = document.createElement('div');
+    card.className = "result-card";
+    card.innerHTML = `
+      <div class="result-header">Slot Size: ${slot}"</div>
+      <div class="result-metrics">
+        <span>TI: <span class="highlight">${ti}</span></span>
+        <span>HI: <span class="highlight">${hi}</span></span>
+        <span>Total: <span class="highlight">${total}</span></span>
+      </div>
+      <div style="margin:10px 0;padding:8px;background:#e8f4ff;border-left:4px solid #0071ce;border-radius:6px;">
+        Pallet Longest Side: <strong>${palletL}"</strong><br>
+        Pallet Shortest Side: <strong>${palletW}"</strong>
+      </div>
+    `;
+    results.appendChild(card);
   });
+  showPage(4);
 }
-
-/* ---------- Your existing calculate() function remains here ---------- */
 </script>
 </body>
 </html>
-
 
 
 
