@@ -108,7 +108,6 @@
     justify-content: space-around;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 10px;
   }
 
   .view {
@@ -141,9 +140,9 @@
   <div class="page" id="page-2">
     <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
       <strong>Before measuring:</strong><br>
-      • Round up if between half inches.<br>
-      • Measure the case as it sits on the pallet.<br>
-      • If there are <strong>upright arrows</strong>, place case upright before measuring.
+      • Round up half inches.<br>
+      • Measure as case sits on pallet.<br>
+      • If case has <strong>upright arrows</strong>, measure upright.
     </div>
     <div style="text-align: center; margin: 10px 0;">
       <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/measurement.png?raw=true"
@@ -163,7 +162,7 @@
 
   <!-- PAGE 3 -->
   <div class="page" id="page-3">
-    <label>Select Slot Sizes:</label>
+    <label>Select Slot Sizes (choose one or more):</label>
     <div id="slot-options">
       <label><input type="checkbox" value="30"> 30"</label><br>
       <label><input type="checkbox" value="40"> 40"</label><br>
@@ -187,9 +186,8 @@
 </div>
 
 <script>
-/* ---------- NAVIGATION ---------- */
+/* ---------- Page Navigation ---------- */
 let currentPage = 1;
-
 function showPage(n) {
   document.querySelectorAll('.page').forEach((p, i) => {
     p.style.display = (i + 1 === n) ? 'block' : 'none';
@@ -199,7 +197,55 @@ function showPage(n) {
 function nextPage() { if (currentPage < 4) showPage(currentPage + 1); }
 function prevPage() { if (currentPage > 1) showPage(currentPage - 1); }
 
-/* ---------- PACKING ---------- */
+/* ---------- Packing Strategies ---------- */
+function packAllUnrotated(palletL, palletW, boxL, boxW) {
+  const fitL = Math.floor(palletL / boxL);
+  const fitW = Math.floor(palletW / boxW);
+  const placements = [];
+  for (let i = 0; i < fitL; i++) {
+    for (let j = 0; j < fitW; j++) {
+      placements.push({x: i * boxL, y: j * boxW, w: boxL, h: boxW, rot: 0});
+    }
+  }
+  return placements;
+}
+
+function packAllRotated(palletL, palletW, boxL, boxW) {
+  const fitL = Math.floor(palletL / boxW);
+  const fitW = Math.floor(palletW / boxL);
+  const placements = [];
+  for (let i = 0; i < fitL; i++) {
+    for (let j = 0; j < fitW; j++) {
+      placements.push({x: i * boxW, y: j * boxL, w: boxW, h: boxL, rot: 1});
+    }
+  }
+  return placements;
+}
+
+function packAlternatingRows(palletL, palletW, boxL, boxW) {
+  const placements = [];
+  let y = 0;
+  let toggle = false;
+  while (y + Math.min(boxW, boxL) <= palletW) {
+    if (!toggle) {
+      const fitL = Math.floor(palletL / boxL);
+      for (let i = 0; i < fitL; i++) {
+        placements.push({x: i * boxL, y, w: boxL, h: boxW, rot: 0});
+      }
+      y += boxW;
+    } else {
+      const fitL = Math.floor(palletL / boxW);
+      for (let i = 0; i < fitL; i++) {
+        placements.push({x: i * boxW, y, w: boxW, h: boxL, rot: 1});
+      }
+      y += boxL;
+    }
+    toggle = !toggle;
+  }
+  return placements;
+}
+
+// Greedy mixed packer (your original)
 function packLayer(palletL, palletW, boxL, boxW) {
   let freeRects = [{x:0,y:0,w:palletL,h:palletW}];
   const placements = [];
@@ -211,41 +257,59 @@ function packLayer(palletL, palletW, boxL, boxW) {
       const r = freeRects[ri];
       if (boxL <= r.w && boxW <= r.h) {
         const waste = r.w * r.h - boxArea;
-        if (!best || waste < best.waste) best = {rectIndex: ri, rot: 0, waste, place:{x:r.x,y:r.y,w:boxL,h:boxW}};
+        if (!best || waste < best.waste) best = {ri, place:{x:r.x,y:r.y,w:boxL,h:boxW}, rot:0,waste};
       }
       if (boxW <= r.w && boxL <= r.h) {
         const waste = r.w * r.h - boxArea;
-        if (!best || waste < best.waste) best = {rectIndex: ri, rot: 1, waste, place:{x:r.x,y:r.y,w:boxW,h:boxL}};
+        if (!best || waste < best.waste) best = {ri, place:{x:r.x,y:r.y,w:boxW,h:boxL}, rot:1,waste};
       }
     }
     if (!best) break;
-
-    const placed = best.place;
-    placements.push({...placed, rot: best.rot});
-    const used = freeRects[best.rectIndex];
-    freeRects.splice(best.rectIndex,1);
-
-    const rightW = used.w - placed.w;
-    if (rightW > 0) freeRects.push({x:used.x+placed.w,y:used.y,w:rightW,h:placed.h});
-    const bottomH = used.h - placed.h;
-    if (bottomH > 0) freeRects.push({x:used.x,y:used.y+placed.h,w:used.w,h:bottomH});
+    placements.push({...best.place, rot:best.rot});
+    const used = freeRects[best.ri];
+    freeRects.splice(best.ri,1);
+    const rightW = used.w - best.place.w;
+    if (rightW > 0) freeRects.push({x:used.x+best.place.w,y:used.y,w:rightW,h:best.place.h});
+    const bottomH = used.h - best.place.h;
+    if (bottomH > 0) freeRects.push({x:used.x,y:used.y+best.place.h,w:used.w,h:bottomH});
   }
   return placements;
 }
 
-/* ---------- CALCULATE ---------- */
+function chooseBestPacking(palletL, palletW, boxL, boxW) {
+  const strategies = [
+    {name:"All Unrotated", placements: packAllUnrotated(palletL,palletW,boxL,boxW)},
+    {name:"All Rotated", placements: packAllRotated(palletL,palletW,boxL,boxW)},
+    {name:"Alternating Rows", placements: packAlternatingRows(palletL,palletW,boxL,boxW)},
+    {name:"Greedy Mixed", placements: packLayer(palletL,palletW,boxL,boxW)}
+  ];
+  const palletArea = palletL * palletW;
+  strategies.forEach(s=>{
+    const usedArea = s.placements.reduce((sum,p)=>sum+p.w*p.h,0);
+    s.cases = s.placements.length;
+    s.whitespace = palletArea - usedArea;
+  });
+  strategies.sort((a,b)=>{
+    if(b.cases!==a.cases) return b.cases-a.cases;
+    return a.whitespace-b.whitespace;
+  });
+  return strategies[0];
+}
+
+/* ---------- Main Calculate ---------- */
 function calculate() {
   const boxLength = parseFloat(document.getElementById('length').value);
-  const boxWidth  = parseFloat(document.getElementById('width').value);
+  const boxWidth = parseFloat(document.getElementById('width').value);
   const boxHeight = parseFloat(document.getElementById('height').value);
   const palletLength = 47, palletWidth = 40;
 
-  const slotSizes = [...document.querySelectorAll('#slot-options input:checked')].map(el=>parseInt(el.value));
+  const slotSizes = [...document.querySelectorAll('#slot-options input:checked')].map(el => parseInt(el.value));
   const resultsContainer = document.getElementById('results');
   resultsContainer.innerHTML = "";
 
-  if (!boxLength || !boxWidth || !boxHeight) {
-    resultsContainer.innerHTML = "<div class='result-card'>Please enter valid numbers for length, width, and height.</div>";
+  if (isNaN(boxLength) || isNaN(boxWidth) || isNaN(boxHeight) ||
+      boxLength <= 0 || boxWidth <= 0 || boxHeight <= 0) {
+    resultsContainer.innerHTML = "<div class='result-card'>Please enter valid positive numbers.</div>";
     showPage(4); return;
   }
   if (slotSizes.length === 0) {
@@ -253,48 +317,33 @@ function calculate() {
     showPage(4); return;
   }
 
-  slotSizes.forEach(slotHeight => {
+  slotSizes.forEach(slotHeight=>{
     const hi = Math.floor(slotHeight / boxHeight);
-    if (hi <= 0) {
-      const cardNoFit = document.createElement('div');
-      cardNoFit.className = "result-card";
-      cardNoFit.innerHTML = `<div class="result-header">Slot Size: ${slotHeight}"</div>
-        <div class="result-metrics"><span>TI: <span class="highlight">0</span></span>
-        <span>HI: <span class="highlight">0</span></span>
-        <span>Total: <span class="highlight">0</span></span></div>
-        <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107;">
-          Case height exceeds slot height — no layers fit.
-        </div>`;
-      resultsContainer.appendChild(cardNoFit);
+    if (hi<=0) {
+      resultsContainer.innerHTML += `<div class='result-card'><div class="result-header">Slot Size: ${slotHeight}"</div><div>No layers fit (too tall).</div></div>`;
       return;
     }
+    const best = chooseBestPacking(palletLength, palletWidth, boxLength, boxWidth);
+    const ti = best.cases;
+    const total = ti*hi;
 
-    let total = 0;
-    const layers = [];
-    for (let layerIndex = 0; layerIndex < hi; layerIndex++) {
-      const placements = packLayer(palletLength, palletWidth, boxLength, boxWidth);
-      layers.push(placements);
-      total += placements.length;
-      if (placements.length === 0) break;
-    }
+    let orientationText = "";
+    if (best.name==="All Unrotated") orientationText="All cases unrotated (long side along pallet length).";
+    else if (best.name==="All Rotated") orientationText="All cases rotated (short side along pallet length).";
+    else if (best.name==="Alternating Rows") orientationText="Cases alternate orientation row by row.";
+    else orientationText="Mixed orientations chosen greedily to reduce whitespace.";
 
-    let rotCounts = {rot0:0, rot1:0};
-    layers.forEach(layer=>layer.forEach(p=>{ if(p.rot) rotCounts.rot1++; else rotCounts.rot0++; }));
-    let orientationText =
-      rotCounts.rot0 === 0 ? "All cases are rotated (short side along pallet length)." :
-      rotCounts.rot1 === 0 ? "All cases use longest side along pallet length." :
-      `Mixed orientations (rotated: ${rotCounts.rot1}, unrotated: ${rotCounts.rot0}).`;
-
-    const card = document.createElement('div');
-    card.className = "result-card";
-    card.innerHTML = `
+    const card=document.createElement('div');
+    card.className="result-card";
+    card.innerHTML=`
       <div class="result-header">Slot Size: ${slotHeight}"</div>
       <div class="result-metrics">
+        <span>TI: <span class="highlight">${ti}</span></span>
         <span>HI: <span class="highlight">${hi}</span></span>
         <span>Total: <span class="highlight">${total}</span></span>
       </div>
-      <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107;">
-        ${orientationText}
+      <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:6px; font-size:0.9em;">
+        Strategy: <strong>${best.name}</strong><br>${orientationText}
       </div>
       <div class="view-container">
         <div class="view"><strong>Top View</strong><br/></div>
@@ -303,71 +352,57 @@ function calculate() {
     `;
     resultsContainer.appendChild(card);
 
-    const topCanvas = document.createElement('canvas');
-    const frontCanvas = document.createElement('canvas');
+    const topCanvas=document.createElement('canvas');
+    const frontCanvas=document.createElement('canvas');
     card.querySelectorAll('.view')[0].appendChild(topCanvas);
     card.querySelectorAll('.view')[1].appendChild(frontCanvas);
 
-    drawPacked({layers,palletLength,palletWidth,boxHeight,maxLayers:hi,topCanvas,frontCanvas});
+    drawPacked({layers:Array(hi).fill(best.placements), palletLength,palletWidth,boxHeight,maxLayers:hi,topCanvas,frontCanvas});
   });
 
   showPage(4);
 }
 
-/* ---------- DRAWING ---------- */
-function drawPacked(params) {
-  const { layers, palletLength, palletWidth, boxHeight, maxLayers, topCanvas, frontCanvas } = params;
-  const maxDim = Math.max(palletLength, palletWidth);
-  const scale = 300 / maxDim;
+/* ---------- Drawing ---------- */
+function drawPacked({layers,palletLength,palletWidth,boxHeight,maxLayers,topCanvas,frontCanvas}) {
+  const maxDim=Math.max(palletLength,palletWidth);
+  const scale=300/maxDim;
 
   // Top view
-  topCanvas.width = palletLength * scale;
-  topCanvas.height = palletWidth * scale;
-  const tctx = topCanvas.getContext('2d');
+  topCanvas.width=palletLength*scale;
+  topCanvas.height=palletWidth*scale;
+  const tctx=topCanvas.getContext('2d');
   tctx.clearRect(0,0,topCanvas.width,topCanvas.height);
-  tctx.strokeStyle = "#0071ce";
-  tctx.lineWidth = 2;
+  tctx.strokeStyle="#0071ce"; tctx.lineWidth=2;
   tctx.strokeRect(0,0,topCanvas.width,topCanvas.height);
-  if (layers.length > 0 && layers[0].length > 0) {
+  if(layers[0].length>0){
     layers[0].forEach(p=>{
-      const px = p.x * scale, py = p.y * scale, pw = p.w * scale, ph = p.h * scale;
-      tctx.fillStyle = "#ffc220";
-      tctx.fillRect(px, py, pw, ph);
-      tctx.strokeStyle = "#333";
-      tctx.strokeRect(px, py, pw, ph);
+      const px=p.x*scale, py=p.y*scale, pw=p.w*scale, ph=p.h*scale;
+      tctx.fillStyle="#ffc220"; tctx.fillRect(px,py,pw,ph);
+      tctx.strokeStyle="#333"; tctx.strokeRect(px,py,pw,ph);
     });
   } else {
-    tctx.fillStyle = "#666";
-    tctx.fillText("No cases fit", 10, 20);
+    tctx.fillStyle="#666"; tctx.fillText("No fit",10,20);
   }
 
   // Front view
-  const verticalScale = scale/2;
-  frontCanvas.width = palletLength * scale;
-  frontCanvas.height = Math.max(80, boxHeight * maxLayers * verticalScale);
-  const fctx = frontCanvas.getContext('2d');
+  const verticalScale=scale/2;
+  frontCanvas.width=palletLength*scale;
+  frontCanvas.height=Math.max(80,boxHeight*maxLayers*verticalScale);
+  const fctx=frontCanvas.getContext('2d');
   fctx.clearRect(0,0,frontCanvas.width,frontCanvas.height);
-  fctx.strokeStyle = "#0071ce";
-  fctx.beginPath();
-  fctx.moveTo(0, frontCanvas.height - 2);
-  fctx.lineTo(frontCanvas.width, frontCanvas.height - 2);
-  fctx.stroke();
-
-  layers.forEach((layer, idx)=>{
-    const layerYTop = frontCanvas.height - (idx+1) * boxHeight * verticalScale;
+  fctx.strokeStyle="#0071ce"; fctx.beginPath();
+  fctx.moveTo(0,frontCanvas.height-2); fctx.lineTo(frontCanvas.width,frontCanvas.height-2); fctx.stroke();
+  layers.forEach((layer,li)=>{
+    const yTop=frontCanvas.height-(li+1)*boxHeight*verticalScale;
     layer.forEach(p=>{
-      const px = p.x * scale, pw = p.w * scale, ph = boxHeight * verticalScale;
-      fctx.fillStyle = "#ffc220";
-      fctx.fillRect(px, layerYTop, pw, ph);
-      fctx.strokeStyle = "#333";
-      fctx.strokeRect(px, layerYTop, pw, ph);
+      const px=p.x*scale, pw=p.w*scale, ph=boxHeight*verticalScale;
+      fctx.fillStyle="#ffc220"; fctx.fillRect(px,yTop,pw,ph);
+      fctx.strokeStyle="#333"; fctx.strokeRect(px,yTop,pw,ph);
     });
   });
-
-  fctx.fillStyle = "#000";
-  fctx.font = "12px Arial";
-  fctx.fillText(`Layers: ${layers.length}`, 6, 14);
 }
 </script>
 </body>
 </html>
+
