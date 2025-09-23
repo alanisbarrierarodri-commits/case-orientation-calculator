@@ -201,8 +201,6 @@ function showPage(n) {
 function nextPage() { showPage(Math.min(currentPage + 1, 4)); }
 function prevPage() { showPage(Math.max(currentPage - 1, 1)); }
 
-/* ---------- PACKING ALGORITHM (guillotine-style free-rect split) ---------- */
-
 function packLayer(palletL, palletW, boxL, boxW) {
   let freeRects = [{x:0,y:0,w:palletL,h:palletW}];
   const placements = [];
@@ -212,287 +210,150 @@ function packLayer(palletL, palletW, boxL, boxW) {
     let best = null;
     for (let ri = 0; ri < freeRects.length; ri++) {
       const r = freeRects[ri];
-      // try no-rotation
-      if (boxL <= r.w + 1e-9 && boxW <= r.h + 1e-9) {
+      if (boxL <= r.w && boxW <= r.h) {
         const waste = r.w * r.h - boxArea;
-        if (!best || waste < best.waste) {
-          best = {rectIndex: ri, rot: 0, waste, place: {x: r.x, y: r.y, w: boxL, h: boxW}};
-        }
+        if (!best || waste < best.waste) best = {ri, rot:0, waste, p:{x:r.x,y:r.y,w:boxL,h:boxW}};
       }
-      // try rotation
-      if (boxW <= r.w + 1e-9 && boxL <= r.h + 1e-9) {
+      if (boxW <= r.w && boxL <= r.h) {
         const waste = r.w * r.h - boxArea;
-        if (!best || waste < best.waste) {
-          best = {rectIndex: ri, rot: 1, waste, place: {x: r.x, y: r.y, w: boxW, h: boxL}};
-        }
+        if (!best || waste < best.waste) best = {ri, rot:1, waste, p:{x:r.x,y:r.y,w:boxW,h:boxL}};
       }
     }
-
     if (!best) break;
 
-    const placed = best.place;
-    placements.push({...placed, rot: best.rot});
+    placements.push({...best.p, rot: best.rot});
+    const used = freeRects[best.ri];
+    freeRects.splice(best.ri, 1);
 
-    const used = freeRects[best.rectIndex];
-    freeRects.splice(best.rectIndex, 1);
-
-    const rightW = used.w - placed.w;
-    if (rightW > 0.0001) {
-      freeRects.push({
-        x: used.x + placed.w,
-        y: used.y,
-        w: rightW,
-        h: placed.h
-      });
-    }
-
-    const bottomH = used.h - placed.h;
-    if (bottomH > 0.0001) {
-      freeRects.push({
-        x: used.x,
-        y: used.y + placed.h,
-        w: used.w,
-        h: bottomH
-      });
-    }
-
-    freeRects = mergeFreeRects(freeRects);
+    const rightW = used.w - best.p.w;
+    if (rightW > 0.0001) freeRects.push({x: used.x + best.p.w, y: used.y, w: rightW, h: best.p.h});
+    const bottomH = used.h - best.p.h;
+    if (bottomH > 0.0001) freeRects.push({x: used.x, y: used.y + best.p.h, w: used.w, h: bottomH});
   }
-
   return placements;
 }
-
-function mergeFreeRects(rects) {
-  let changed = true;
-  while (changed) {
-    changed = false;
-    outer:
-    for (let i = 0; i < rects.length; i++) {
-      for (let j = i+1; j < rects.length; j++) {
-        const A = rects[i], B = rects[j];
-        if (Math.abs(A.x - B.x) < 1e-9 && Math.abs(A.w - B.w) < 1e-9) {
-          if (Math.abs(A.y + A.h - B.y) < 1e-9) {
-            rects[i] = {x: A.x, y: A.y, w: A.w, h: A.h + B.h};
-            rects.splice(j,1);
-            changed = true;
-            break outer;
-          } else if (Math.abs(B.y + B.h - A.y) < 1e-9) {
-            rects[i] = {x: B.x, y: B.y, w: B.w, h: B.h + A.h};
-            rects.splice(j,1);
-            changed = true;
-            break outer;
-          }
-        }
-        if (Math.abs(A.y - B.y) < 1e-9 && Math.abs(A.h - B.h) < 1e-9) {
-          if (Math.abs(A.x + A.w - B.x) < 1e-9) {
-            rects[i] = {x: A.x, y: A.y, w: A.w + B.w, h: A.h};
-            rects.splice(j,1);
-            changed = true;
-            break outer;
-          } else if (Math.abs(B.x + B.w - A.x) < 1e-9) {
-            rects[i] = {x: B.x, y: B.y, w: B.w + A.w, h: B.h};
-            rects.splice(j,1);
-            changed = true;
-            break outer;
-          }
-        }
-      }
-    }
-  }
-  return rects;
-}
-
-/* ---------- MAIN calculate + drawing ---------- */
 
 function calculate() {
   const boxLength = parseFloat(document.getElementById('length').value);
   const boxWidth = parseFloat(document.getElementById('width').value);
   const boxHeight = parseFloat(document.getElementById('height').value);
   const palletLength = 47, palletWidth = 40;
-
   const slotSizes = [...document.querySelectorAll('#slot-options input:checked')].map(el => parseInt(el.value));
-  const resultsContainer = document.getElementById('results');
-  resultsContainer.innerHTML = "";
+  const results = document.getElementById('results');
+  results.innerHTML = "";
 
-  if (isNaN(boxLength) || isNaN(boxWidth) || isNaN(boxHeight) ||
-      boxLength <= 0 || boxWidth <= 0 || boxHeight <= 0) {
-    resultsContainer.innerHTML = "<div class='result-card'>Please enter valid positive numbers for length, width, and height.</div>";
-    showPage(4);
-    return;
+  if ([boxLength, boxWidth, boxHeight].some(v => isNaN(v) || v <= 0)) {
+    results.innerHTML = "<div class='result-card'>Please enter valid numbers for length, width, and height.</div>";
+    showPage(4); return;
   }
   if (slotSizes.length === 0) {
-    resultsContainer.innerHTML = "<div class='result-card'>Please select at least one slot size.</div>";
-    showPage(4);
-    return;
+    results.innerHTML = "<div class='result-card'>Please select at least one slot size.</div>";
+    showPage(4); return;
   }
 
-  slotSizes.forEach(slotHeight => {
-    const hi = Math.floor(slotHeight / boxHeight);
+  slotSizes.forEach(slot => {
+    const hi = Math.floor(slot / boxHeight);
     if (hi <= 0) {
-      const cardNoFit = document.createElement('div');
-      cardNoFit.className = "result-card";
-      cardNoFit.innerHTML = `<div class="result-header">Slot Size: ${slotHeight}"</div>
-        <div class="result-metrics">
-          <span>TI: <span class="highlight">0</span></span>
-          <span>HI: <span class="highlight">0</span></span>
-          <span>Total: <span class="highlight">0</span></span>
-        </div>
-        <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:6px; font-size:0.9em;">
-          Case height exceeds slot height — no layers fit.
-        </div>`;
-      resultsContainer.appendChild(cardNoFit);
+      results.innerHTML += `<div class="result-card">
+        <div class="result-header">Slot Size: ${slot}"</div>
+        <div>Case height exceeds slot height.</div>
+      </div>`;
       return;
     }
 
     let total = 0;
     const layers = [];
-    for (let layerIndex = 0; layerIndex < hi; layerIndex++) {
-      const placements = packLayer(palletLength, palletWidth, boxLength, boxWidth);
-      layers.push(placements);
-      total += placements.length;
-      if (placements.length === 0) break;
+    for (let i = 0; i < hi; i++) {
+      const p = packLayer(palletLength, palletWidth, boxLength, boxWidth);
+      total += p.length;
+      layers.push(p);
     }
-
-    let rotCounts = {rot0:0, rot1:0};
-    layers.forEach(layer => layer.forEach(p => { if (p.rot === 1) rotCounts.rot1++; else rotCounts.rot0++; }));
-    let orientationText = "Mixed orientations per layer may be used to maximize fit.";
-    if (rotCounts.rot0 === 0 && rotCounts.rot1 > 0) orientationText = "All placed cases are rotated (short side along pallet length).";
-    else if (rotCounts.rot1 === 0 && rotCounts.rot0 > 0) orientationText = "All placed cases use their longest side aligned with the pallet's longest side.";
-    else orientationText = `Mixed orientations used (rotated: ${rotCounts.rot1}, unrotated: ${rotCounts.rot0}).`;
 
     const card = document.createElement('div');
     card.className = "result-card";
     card.innerHTML = `
-      <div class="result-header">Slot Size: ${slotHeight}"</div>
+      <div class="result-header">Slot Size: ${slot}"</div>
       <div class="result-metrics">
-        <span>TI (layer best): <span class="highlight">${layers.length ? Math.max(...layers.map(l=>l.length)) : 0}</span></span>
+        <span>TI: <span class="highlight">${layers.length ? layers[0].length : 0}</span></span>
         <span>HI: <span class="highlight">${hi}</span></span>
         <span>Total: <span class="highlight">${total}</span></span>
       </div>
-      <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:6px; font-size:0.9em;">
-        ${orientationText}
-      </div>
       <div class="view-container">
-        <div class="view"><strong>Top View (layer 1)</strong><br/></div>
-        <div class="view"><strong>Front View (layers)</strong><br/></div>
+        <div class="view"><strong>Top View</strong><br/></div>
+        <div class="view"><strong>Front View</strong><br/></div>
       </div>
     `;
-    resultsContainer.appendChild(card);
+    results.appendChild(card);
 
     const topCanvas = document.createElement('canvas');
     const frontCanvas = document.createElement('canvas');
-    const topViewDiv = card.querySelectorAll('.view')[0];
-    const frontViewDiv = card.querySelectorAll('.view')[1];
-    topViewDiv.appendChild(topCanvas);
-    frontViewDiv.appendChild(frontCanvas);
-
-    drawPacked({
-      layers, palletLength, palletWidth, boxLength, boxWidth, boxHeight, maxLayers: hi,
-      topCanvas, frontCanvas
-    });
+    card.querySelectorAll('.view')[0].appendChild(topCanvas);
+    card.querySelectorAll('.view')[1].appendChild(frontCanvas);
+    drawPacked({layers, palletLength, palletWidth, boxLength, boxWidth, boxHeight, hi, topCanvas, frontCanvas});
   });
-
   showPage(4);
 }
 
-/* ---------- DRAWING of the packing results (with pallet side labels) ---------- */
+function drawPacked({layers, palletLength, palletWidth, boxLength, boxWidth, boxHeight, hi, topCanvas, frontCanvas}) {
+  const scale = 300 / Math.max(palletLength, palletWidth);
+  topCanvas.width = palletLength * scale;
+  topCanvas.height = palletWidth * scale;
+  const ctx = topCanvas.getContext('2d');
+  ctx.clearRect(0,0,topCanvas.width,topCanvas.height);
 
-function drawPacked(params) {
-  const { layers, palletLength, palletWidth, boxLength, boxWidth, boxHeight, maxLayers, topCanvas, frontCanvas } = params;
-  const maxDim = Math.max(palletLength, palletWidth);
-  const scale = 300 / maxDim; // 300px for largest pallet side
+  ctx.strokeStyle = "#0071ce";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(0,0,topCanvas.width,topCanvas.height);
 
-  // Top view: show first layer's placements (if any)
-  topCanvas.width = Math.round(palletLength * scale);
-  topCanvas.height = Math.round(palletWidth * scale);
-  const tctx = topCanvas.getContext('2d');
-  tctx.clearRect(0,0,topCanvas.width,topCanvas.height);
+  // === Explicit pallet side labels ===
+  ctx.fillStyle = "#000";
+  ctx.font = "14px Arial";
+  const topLabel = "Pallet Longest Side";
+  const leftLabel = "Pallet Shortest Side";
 
-  // pallet border
-  tctx.strokeStyle = "#0071ce";
-  tctx.lineWidth = 2;
-  tctx.strokeRect(0,0,topCanvas.width,topCanvas.height);
+  // Top (center)
+  const topWidth = ctx.measureText(topLabel).width;
+  ctx.fillText(topLabel, (topCanvas.width - topWidth)/2, 16);
 
-  // === NEW: draw side labels for longest/shortest pallet sides ===
-  tctx.fillStyle = "#000";
-  // pick a font that scales with canvas but stays readable
-  const fontSize = Math.max(12, Math.round(Math.min(18, topCanvas.width * 0.04)));
-  tctx.font = `${fontSize}px Arial`;
-  const topLabel = `${palletLength}" (Length)`;
-  const leftLabel = `${palletWidth}" (Width)`;
+  // Left (vertical center)
+  ctx.save();
+  ctx.translate(14, topCanvas.height/2 + ctx.measureText(leftLabel).width/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText(leftLabel, 0, 0);
+  ctx.restore();
+  // === End labels ===
 
-  // top (center)
-  const topLabelWidth = tctx.measureText(topLabel).width;
-  const topLabelX = Math.max(6, topCanvas.width/2 - topLabelWidth/2);
-  const topLabelY = Math.min(fontSize + 4, topCanvas.height - 4);
-  // place the top label slightly inside the top border
-  tctx.fillText(topLabel, topLabelX, fontSize + 6);
-
-  // left (rotated) - draw vertically centered
-  tctx.save();
-  // translate to a small offset from left edge and vertical center
-  const leftTranslateX = 8;
-  const leftTranslateY = topCanvas.height/2 + (tctx.measureText(leftLabel).width / 2);
-  tctx.translate(leftTranslateX, leftTranslateY);
-  tctx.rotate(-Math.PI/2);
-  tctx.fillText(leftLabel, 0, 0);
-  tctx.restore();
-  // === end labels ===
-
-  if (layers.length > 0 && layers[0].length > 0) {
+  if (layers[0].length > 0) {
     layers[0].forEach(p => {
-      const px = p.x * scale;
-      const py = p.y * scale;
-      const pw = p.w * scale;
-      const ph = p.h * scale;
-      tctx.fillStyle = "#ffc220";
-      tctx.fillRect(px, py, pw, ph);
-      tctx.strokeStyle = "#333";
-      tctx.strokeRect(px, py, pw, ph);
-      // small label
-      tctx.fillStyle = "#000";
-      tctx.font = Math.max(10, Math.min(14, pw/4)) + "px Arial";
-      tctx.fillText("case", px + 2, py + Math.min(12, ph - 2));
+      ctx.fillStyle = "#ffc220";
+      ctx.fillRect(p.x * scale, p.y * scale, p.w * scale, p.h * scale);
+      ctx.strokeStyle = "#333";
+      ctx.strokeRect(p.x * scale, p.y * scale, p.w * scale, p.h * scale);
     });
-  } else {
-    tctx.fillStyle = "#eee";
-    tctx.fillRect(0,0,topCanvas.width, topCanvas.height);
-    tctx.fillStyle = "#666";
-    tctx.fillText("No cases fit in first layer", 8, 18);
   }
 
-  // Front view: draw stacked layers from bottom to top using first N layers
+  // Front view
   frontCanvas.width = palletLength * scale;
-  const verticalScale = scale / 2;
-  frontCanvas.height = Math.max(80, boxHeight * maxLayers * verticalScale);
+  const vScale = scale / 2;
+  frontCanvas.height = Math.max(80, boxHeight * hi * vScale);
   const fctx = frontCanvas.getContext('2d');
   fctx.clearRect(0,0,frontCanvas.width,frontCanvas.height);
   fctx.strokeStyle = "#0071ce";
-  fctx.beginPath();
-  fctx.moveTo(0, frontCanvas.height - 2);
-  fctx.lineTo(frontCanvas.width, frontCanvas.height - 2);
-  fctx.stroke();
+  fctx.strokeRect(0, frontCanvas.height-2, frontCanvas.width, 2);
 
-  layers.forEach((layer, layerIdx) => {
-    const layerYTop = frontCanvas.height - (layerIdx + 1) * boxHeight * verticalScale;
+  layers.forEach((layer, idx) => {
+    const yTop = frontCanvas.height - (idx + 1) * boxHeight * vScale;
     layer.forEach(p => {
-      const px = p.x * scale;
-      const pw = p.w * scale;
-      const ph = boxHeight * verticalScale;
       fctx.fillStyle = "#ffc220";
-      fctx.fillRect(px, layerYTop, pw, ph);
+      fctx.fillRect(p.x * scale, yTop, p.w * scale, boxHeight * vScale);
       fctx.strokeStyle = "#333";
-      fctx.strokeRect(px, layerYTop, pw, ph);
+      fctx.strokeRect(p.x * scale, yTop, p.w * scale, boxHeight * vScale);
     });
   });
-
-  fctx.fillStyle = "#000";
-  fctx.font = "12px Arial";
-  fctx.fillText(`Layers drawn: ${layers.length}`, 6, 14);
 }
-
 </script>
 </body>
 </html>
+
 
 
