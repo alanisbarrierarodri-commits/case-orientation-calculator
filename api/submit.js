@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, email, message } = req.body;
+   const { item, height, length, width, slot, ti, hi } = req.body;
 
     const response = await fetch(
       `https://api.smartsheet.com/2.0/sheets/${process.env.SHEET_ID}/rows`,
@@ -17,9 +17,13 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           toTop: true,
           cells: [
-            { columnId: 1111111111111, value: name },
-            { columnId: 2222222222222, value: email },
-            { columnId: 3333333333333, value: message }
+            { columnId: 5779083682860932, value: item },
+            { columnId: 3527283869175684, value: height },
+            { columnId: 8030883496546180, value: length },
+            { columnId: 712534102069124, value: width },
+            { columnId: 5216133729439620, value: slot },
+            { columnId: 8135964837498756, value: ti },
+            { columnId: 817615443021700, value: hi }
           ]
         })
       }
