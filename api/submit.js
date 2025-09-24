@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-   const { item, height, length, width, slot, ti, hi } = req.body;
+    const { item, height, length, width, slot, ti, hi } = req.body;
 
     const response = await fetch(
       `https://api.smartsheet.com/2.0/sheets/${process.env.SHEET_ID}/rows`,
@@ -16,23 +16,29 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           toTop: true,
-          cells: [
-            { columnId: 5779083682860932, value: item },
-            { columnId: 3527283869175684, value: height },
-            { columnId: 8030883496546180, value: length },
-            { columnId: 712534102069124, value: width },
-            { columnId: 5216133729439620, value: slot },
-            { columnId: 8135964837498756, value: ti },
-            { columnId: 817615443021700, value: hi }
+          rows: [  //  wrap in rows array
+            {
+              cells: [
+                { columnId: 5779083682860932, value: item },
+                { columnId: 3527283869175684, value: height },
+                { columnId: 8030883496546180, value: length },
+                { columnId: 712534102069124, value: width },
+                { columnId: 5216133729439620, value: slot },
+                { columnId: 8135964837498756, value: ti },
+                { columnId: 817615443021700, value: hi }
+              ]
+            }
           ]
         })
       }
     );
 
     const data = await response.json();
+    if (!response.ok) throw new Error(JSON.stringify(data));
+
     res.status(200).json(data);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to send to Smartsheet" });
+    res.status(500).json({ error: "Failed to send to Smartsheet", details: err.message });
   }
 }
