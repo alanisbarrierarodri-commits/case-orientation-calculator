@@ -20,7 +20,6 @@ export default async function handler(req, res) {
         { columnId: 5216133729439620, value: r.slotHeight },
         { columnId: 8135964837498756, value: r.TI },
         { columnId: 817615443021700, value: r.HI },
-        { columnId: 1234567890123456, value: r.Strategy } // optional: strategy column
       ]
     }));
 
