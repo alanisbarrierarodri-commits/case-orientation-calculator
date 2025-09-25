@@ -10,227 +10,208 @@
     --walmart-yellow: #ffc220;
     --light-gray: #f5f5f5;
   }
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background: var(--light-gray);
-  }
-  .container {
-    max-width: 800px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-  }
-  h1 { text-align: center; color: var(--walmart-blue); }
+  body { font-family: Arial, sans-serif; margin: 0; background: var(--light-gray); }
+  header { background: var(--walmart-blue); color: white; padding: 15px; text-align: center; font-size: 1.4em; font-weight: bold; }
+  .container { background: white; max-width: 640px; margin: 20px auto; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
   .page { display: none; }
-  .page.active { display: block; }
-  .form-group { margin-bottom: 15px; }
-  label { display: block; margin-bottom: 5px; font-weight: bold; }
-  input[type="number"] { width: 100%; padding: 8px; }
-  .button-group { margin-top: 20px; text-align: center; }
+  label { font-weight: bold; display: block; margin-top: 10px; }
+  input { width: 100%; padding: 10px; margin: 5px 0 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; }
   button {
-    background: var(--walmart-blue);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin: 5px;
-    cursor: pointer;
-    border-radius: 6px;
-    font-size: 16px;
+    padding: 10px 16px; margin: 8px 4px 0 0;
+    background: var(--walmart-yellow); color: black; font-weight: bold;
+    border: none; border-radius: 8px; font-size: 1em; transition: background 0.2s;
   }
-  button:hover { background: #005fa3; }
-  .slot-options label { margin-right: 15px; }
-  .result-card {
-    background: #fefefe;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-  }
-  .result-header {
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: var(--walmart-blue);
-  }
-  .result-metrics span { display: inline-block; margin-right: 15px; font-size: 1.1em; }
-  .highlight { color: var(--walmart-yellow); font-weight: bold; }
-  canvas { display: block; margin-top: 10px; background: #e0e0e0; border-radius: 6px; }
-  .last-page-buttons {
-    display: flex;
-    justify-content: space-between;  /* Left/Right alignment */
-    width: 100%;
-    margin-top: 20px;
-  }
+  button:hover { background: #e6ac00; cursor: pointer; }
+  .results-container { margin-top: 10px; display: flex; flex-direction: column; gap: 20px; max-height: 500px; overflow-y: auto; padding-right: 8px; }
+  .result-card { border: 2px solid var(--walmart-blue); border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 15px; background: #f8fbff; }
+  .result-header { font-size: 1.1em; font-weight: bold; color: white; background: var(--walmart-blue); padding: 6px 10px; border-radius: 8px; margin-bottom: 8px; }
+  .result-metrics span { display: inline-block; margin-right: 15px; font-weight: bold; color: #333; }
+  .result-metrics .highlight { color: var(--walmart-yellow); }
+  canvas { display:block; max-width:100%; height:auto; margin-top:10px; border:1px solid #ccc; border-radius:6px; background:#e0e0e0; }
 </style>
 </head>
 <body>
+<header>SSTK Case Orientation Calculator</header>
 <div class="container">
-  <h1>SSTK Case Orientation Calculator</h1>
 
-  <!-- PAGE 1: Box Dimensions -->
-  <div id="page1" class="page active">
-    <div class="form-group">
-      <label>Box Length (in)</label>
-      <input type="number" id="length" placeholder="Enter box length">
+  <!-- PAGE 1 -->
+  <div class="page" id="page-1" style="display:block;">
+    <label for="itemNumber">Item #:</label>
+    <input type="text" id="itemNumber">
+    <div style="text-align: center; margin: 10px 0;">
+      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/item.png?raw=true"
+           alt="Item Image" style="max-width:100%; border-radius:8px;">
     </div>
-    <div class="form-group">
-      <label>Box Width (in)</label>
-      <input type="number" id="width" placeholder="Enter box width">
-    </div>
-    <div class="form-group">
-      <label>Box Height (in)</label>
-      <input type="number" id="height" placeholder="Enter box height">
-    </div>
-    <div class="button-group">
-      <button onclick="nextPage()">Next</button>
-    </div>
+    <button onclick="nextPage()">Next</button>
   </div>
 
-  <!-- PAGE 2: Slot Sizes -->
-  <div id="page2" class="page">
-    <div class="form-group slot-options">
-      <label>Select Slot Heights (in):</label>
-      <label><input type="checkbox" value="50">50</label>
-      <label><input type="checkbox" value="60">60</label>
-      <label><input type="checkbox" value="70">70</label>
+  <!-- PAGE 2 -->
+  <div class="page" id="page-2">
+    <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
+      <strong>Before measuring:</strong><br>
+      • Round up half inches.<br>
+      • Measure as case sits on pallet.<br>
+      • If case has <strong>upright arrows</strong>, measure upright.
     </div>
-    <div class="button-group">
-      <button onclick="prevPage()">Previous</button>
-      <button onclick="nextPage()">Next</button>
+    <div style="text-align: center; margin: 10px 0;">
+      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/measurement.png?raw=true"
+           alt="Measurement Guide" style="max-width:100%; border-radius:8px;">
     </div>
+    <label for="height">Height (inches):</label>
+    <input type="number" id="height" step="0.01">
+    <label for="length">Length (inches):</label>
+    <small>Longest side</small>
+    <input type="number" id="length" step="0.01">
+    <label for="width">Width (inches):</label>
+    <small>Shortest side</small>
+    <input type="number" id="width" step="0.01">
+    <button onclick="prevPage()">Previous</button>
+    <button onclick="nextPage()">Next</button>
   </div>
 
-  <!-- PAGE 3: Confirm -->
-  <div id="page3" class="page">
-    <p>Click calculate to see pallet layouts and case counts.</p>
-    <div class="button-group">
-      <button onclick="prevPage()">Previous</button>
-      <button onclick="calculate()">Calculate</button>
+  <!-- PAGE 3 -->
+  <div class="page" id="page-3">
+    <label>Select Slot Sizes (choose one or more):</label>
+    <div id="slot-options">
+      <label><input type="checkbox" value="30"> 30"</label><br>
+      <label><input type="checkbox" value="40"> 40"</label><br>
+      <label><input type="checkbox" value="50"> 50"</label><br>
+      <label><input type="checkbox" value="60"> 60"</label><br>
+      <label><input type="checkbox" value="71"> 71"</label><br>
+      <label><input type="checkbox" value="73"> 73"</label><br>
+      <label><input type="checkbox" value="75"> 75"</label><br>
+      <label><input type="checkbox" value="110"> 110"</label><br>
     </div>
+    <button onclick="prevPage()">Previous</button>
+    <button onclick="calculate()">Calculate</button>
   </div>
 
-  <!-- PAGE 4: Results -->
-  <div id="page4" class="page">
-    <div id="results"></div>
-    <div class="button-group last-page-buttons">
-      <button id="prevBtn" onclick="prevPage()">Previous</button>
-      <button id="sendToQA" onclick="sendToQA()">Send to QA</button>
-    </div>
+  <!-- PAGE 4 -->
+  <div class="page" id="page-4">
+    <div class="results-container" id="results"></div>
+    <button id="sendQA" onclick="sendToQA()">Send to QA</button>
+    <button onclick="prevPage()">Previous</button>
   </div>
+
 </div>
 
 <script>
-let currentPage = 1;
+/* ---------- Page Navigation ---------- */
 let lastResults = [];
+let currentPage = 1;
+function showPage(n){document.querySelectorAll('.page').forEach((p,i)=>p.style.display=(i+1===n)?'block':'none');currentPage=n;}
+function nextPage(){if(currentPage<4)showPage(currentPage+1);}
+function prevPage(){if(currentPage>1)showPage(currentPage-1);}
 
-function showPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page' + page).classList.add('active');
-  currentPage = page;
-}
-function nextPage() { showPage(currentPage + 1); }
-function prevPage() { showPage(currentPage - 1); }
-
-// packing logic
-function chooseBestPacking(palletLength, palletWidth, boxLength, boxWidth) {
-  const configs = [
-    { name: "Normal", w: boxLength, h: boxWidth, rot: false },
-    { name: "Rotated", w: boxWidth, h: boxLength, rot: true }
+/* ---------- Packing Strategies ---------- */
+function packAllUnrotated(pl,pw,bl,bw){const fitL=Math.floor(pl/bl),fitW=Math.floor(pw/bw),placements=[];for(let i=0;i<fitL;i++){for(let j=0;j<fitW;j++){placements.push({x:i*bl,y:j*bw,w:bl,h:bw,rot:0});}}return placements;}
+function packAllRotated(pl,pw,bl,bw){const fitL=Math.floor(pl/bw),fitW=Math.floor(pw/bl),placements=[];for(let i=0;i<fitL;i++){for(let j=0;j<fitW;j++){placements.push({x:i*bw,y:j*bl,w:bw,h:bl,rot:1});}}return placements;}
+function packAlternatingRows(pl,pw,bl,bw){const placements=[];let y=0,toggle=false;while(y+Math.min(bw,bl)<=pw){if(!toggle){const fitL=Math.floor(pl/bl);for(let i=0;i<fitL;i++){placements.push({x:i*bl,y,w:bl,h:bw,rot:0});}y+=bw;}else{const fitL=Math.floor(pl/bw);for(let i=0;i<fitL;i++){placements.push({x:i*bw,y,w:bw,h:bl,rot:1});}y+=bl;}toggle=!toggle;}return placements;}
+function packLayer(pl,pw,bl,bw){let freeRects=[{x:0,y:0,w:pl,h:pw}],placements=[],boxArea=bl*bw;while(true){let best=null;for(let ri=0;ri<freeRects.length;ri++){const r=freeRects[ri];if(bl<=r.w&&bw<=r.h){const waste=r.w*r.h-boxArea;if(!best||waste<best.waste)best={ri,place:{x:r.x,y:r.y,w:bl,h:bw},rot:0,waste};}
+if(bw<=r.w&&bl<=r.h){const waste=r.w*r.h-boxArea;if(!best||waste<best.waste)best={ri,place:{x:r.x,y:r.y,w:bw,h:bl},rot:1,waste};}}if(!best)break;
+placements.push({...best.place,rot:best.rot});const used=freeRects[best.ri];freeRects.splice(best.ri,1);
+const rightW=used.w-best.place.w;if(rightW>0)freeRects.push({x:used.x+best.place.w,y:used.y,w:rightW,h:best.place.h});
+const bottomH=used.h-best.place.h;if(bottomH>0)freeRects.push({x:used.x,y:used.y+best.place.h,w:used.w,h:bottomH});}return placements;}
+function chooseBestPacking(pl,pw,bl,bw){
+  const strategies=[
+    {name:"All Unrotated",placements:packAllUnrotated(pl,pw,bl,bw)},
+    {name:"All Rotated",placements:packAllRotated(pl,pw,bl,bw)},
+    {name:"Alternating Rows",placements:packAlternatingRows(pl,pw,bl,bw)},
+    {name:"Greedy Mixed",placements:packLayer(pl,pw,bl,bw)}
   ];
-  let best = { cases: 0 };
-  configs.forEach(c => {
-    const nx = Math.floor(palletLength / c.w);
-    const ny = Math.floor(palletWidth / c.h);
-    const count = nx * ny;
-    if (count > best.cases) {
-      best = { ...c, cases: count, nx, ny };
-    }
+  const palletArea=pl*pw;
+  strategies.forEach(s=>{
+    const used=s.placements.reduce((sum,p)=>sum+p.w*p.h,0);
+    s.cases=s.placements.length;
+    s.whitespace=palletArea-used;
   });
-  // compute placements for visualization
-  let placements = [];
-  for (let i=0; i<best.nx; i++) {
-    for (let j=0; j<best.ny; j++) {
-      placements.push({x: i*best.w, y: j*best.h, w: best.w, h: best.h, rot: best.rot});
-    }
-  }
-  best.placements = placements;
-  return best;
+  strategies.sort((a,b)=>b.cases!==a.cases?b.cases-a.cases:a.whitespace-b.whitespace);
+  return strategies[0];
 }
 
-function calculate() {
-  lastResults = [];
-  const boxLength = parseFloat(document.getElementById('length').value);
-  const boxWidth = parseFloat(document.getElementById('width').value);
-  const boxHeight = parseFloat(document.getElementById('height').value);
-  const palletLength = 47, palletWidth = 40;
-  const slotSizes = [...document.querySelectorAll('#page2 input:checked')].map(el => parseInt(el.value));
-  const resultsContainer = document.getElementById('results');
-  resultsContainer.innerHTML = "";
+/* ---------- Calculate + Draw ---------- */
+function calculate(){
+  lastResults=[];
+  const bl=parseFloat(document.getElementById('length').value);
+  const bw=parseFloat(document.getElementById('width').value);
+  const bh=parseFloat(document.getElementById('height').value);
+  const palletL=47,palletW=40;
+  const slots=[...document.querySelectorAll('#slot-options input:checked')].map(e=>parseInt(e.value));
+  const results=document.getElementById('results');
+  results.innerHTML="";
 
-  if ([boxLength, boxWidth, boxHeight].some(v => isNaN(v) || v <= 0)) {
-    resultsContainer.innerHTML = "<div class='result-card'>Please enter valid positive numbers.</div>";
-    showPage(4); return;
+  if([bl,bw,bh].some(v=>isNaN(v)||v<=0)){
+    results.innerHTML="<div class='result-card'>Please enter valid positive numbers.</div>";
+    showPage(4);return;
   }
-  if (slotSizes.length === 0) {
-    resultsContainer.innerHTML = "<div class='result-card'>Please select at least one slot size.</div>";
-    showPage(4); return;
+  if(slots.length===0){
+    results.innerHTML="<div class='result-card'>Please select at least one slot size.</div>";
+    showPage(4);return;
   }
 
-  slotSizes.forEach(slotHeight => {
-    const hi = Math.floor(slotHeight / boxHeight);
-    if (hi <= 0) {
-      resultsContainer.innerHTML += `<div class='result-card'><div class="result-header">Slot Size: ${slotHeight}"</div><div>No layers fit (too tall).</div></div>`;
+  slots.forEach(slot=>{
+    const hi=Math.floor(slot/bh);
+    if(hi<=0){
+      results.innerHTML+=`<div class='result-card'><div class="result-header">Slot Size: ${slot}"</div><div>No layers fit (too tall).</div></div>`;
       return;
     }
-    const best = chooseBestPacking(palletLength, palletWidth, boxLength, boxWidth);
-    const ti = best.cases;
-    const total = ti * hi;
-    lastResults.push({slotHeight, TI: ti, HI: hi, Total: total, Strategy: best.name});
+    const best=chooseBestPacking(palletL,palletW,bl,bw);
+    const ti=best.cases,total=ti*hi;
+    lastResults.push({slotHeight:slot,TI:ti,HI:hi,Total:total,Strategy:best.name});
 
-    const card = document.createElement('div');
-    card.className = "result-card";
-    card.innerHTML = `
-      <div class="result-header">Slot Size: ${slotHeight}"</div>
+    const card=document.createElement('div');
+    card.className="result-card";
+    card.innerHTML=`
+      <div class="result-header">Slot Size: ${slot}"</div>
       <div class="result-metrics">
-        <span>Boxes/Layer (TI): <span class="highlight">${ti}</span></span>
-        <span>Layers (HI): <span class="highlight">${hi}</span></span>
-        <span>Total Boxes: <span class="highlight">${total}</span></span>
+        <span>TI (per layer): <span class="highlight">${ti}</span></span>
+        <span>HI (layers): <span class="highlight">${hi}</span></span>
+        <span>Total: <span class="highlight">${total}</span></span>
       </div>
       <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:6px; font-size:0.9em;">
         Strategy: <strong>${best.name}</strong>
       </div>
     `;
 
-    // Top-down pallet canvas
-    const canvas = document.createElement('canvas');
-    canvas.width = 400;
-    canvas.height = 340;
+    const canvas=document.createElement('canvas');
+    canvas.width=400; canvas.height=340;
     card.appendChild(canvas);
+    const ctx=canvas.getContext('2d');
+    const scaleX=canvas.width/palletL, scaleY=canvas.height/palletW;
 
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#e0e0e0';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    const scaleX = canvas.width / palletLength;
-    const scaleY = canvas.height / palletWidth;
-
-    best.placements.forEach(p => {
-      ctx.fillStyle = p.rot ? '#0071ce' : '#ffc220';
-      ctx.fillRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
-      ctx.strokeStyle = '#000';
-      ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
+    best.placements.forEach(p=>{
+      ctx.fillStyle=p.rot?'#0071ce':'#ffc220'; // rotated = blue, unrotated = yellow
+      ctx.fillRect(p.x*scaleX,p.y*scaleY,p.w*scaleX,p.h*scaleY);
+      ctx.strokeStyle='#000';
+      ctx.strokeRect(p.x*scaleX,p.y*scaleY,p.w*scaleX,p.h*scaleY);
     });
 
-    resultsContainer.appendChild(card);
+    results.appendChild(card);
   });
-
   showPage(4);
 }
 
-function sendToQA() {
-  alert("Results sent to QA:\n" + JSON.stringify(lastResults, null, 2));
+/* ---------- Send To QA ---------- */
+async function sendToQA(){
+  const payload={
+    itemNumber:document.getElementById('itemNumber').value,
+    length:document.getElementById('length').value,
+    width:document.getElementById('width').value,
+    height:document.getElementById('height').value,
+    slotResults:lastResults
+  };
+  try{
+    const resp=await fetch('/api/submit',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+    });
+    const data=await resp.json();
+    if(!resp.ok)throw new Error(data.error||'Error sending to Smartsheet');
+    alert('✅ Sent to Smartsheet!');
+  }catch(err){
+    console.error(err);
+    alert('❌ Failed to send to Smartsheet');
+  }
 }
 </script>
 </body>
 </html>
-
