@@ -1,4 +1,3 @@
-// pages/api/addRows.js
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -11,25 +10,24 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "No slot results provided" });
     }
 
-    // ✅ Correct Smartsheet column IDs
     const COLUMNS = {
-      ITEM: 1275484055490436,     // Item #
-      HEIGHT: 3527283869175684,   // Height
-      LENGTH: 8030883496546180,   // Length
-      WIDTH: 712534102069124,     // Width
-      SLOT_SIZE: 5216133729439620,// Slot Size
-      TI: 8135964837498756,       // Ti
-      HI: 817615443021700         // Hi
+      ITEM: 1275484055490436,
+      HEIGHT: 3527283869175684,
+      LENGTH: 8030883496546180,
+      WIDTH: 712534102069124,
+      SLOT_SIZE: 5216133729439620,
+      TI: 8135964837498756,
+      HI: 817615443021700
     };
 
-    // Map each slot result to a Smartsheet row
     const rows = slotResults.map(r => ({
+      toTop: true,
       cells: [
         { columnId: COLUMNS.ITEM,      value: itemNumber },
         { columnId: COLUMNS.HEIGHT,    value: height },
         { columnId: COLUMNS.LENGTH,    value: length },
         { columnId: COLUMNS.WIDTH,     value: width },
-        { columnId: COLUMNS.SLOT_SIZE, value: r.slotHeight }, // or r.slotSize if needed
+        { columnId: COLUMNS.SLOT_SIZE, value: r.slotHeight },
         { columnId: COLUMNS.TI,        value: r.TI },
         { columnId: COLUMNS.HI,        value: r.HI }
       ]
@@ -43,7 +41,7 @@ export default async function handler(req, res) {
           "Authorization": `Bearer ${process.env.SMARTSHEET_TOKEN}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ toTop: true, rows })
+        body: JSON.stringify(rows)
       }
     );
 
@@ -59,4 +57,5 @@ export default async function handler(req, res) {
     });
   }
 }
+
 
