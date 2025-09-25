@@ -27,9 +27,7 @@
   .result-header { font-size: 1.1em; font-weight: bold; color: white; background: var(--walmart-blue); padding: 6px 10px; border-radius: 8px; margin-bottom: 8px; }
   .result-metrics span { display: inline-block; margin-right: 15px; font-weight: bold; color: #333; }
   .result-metrics .highlight { color: var(--walmart-yellow); }
-  .view-container { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; }
-  .view { border: 1px solid #ccc; background: white; padding: 8px; border-radius: 8px; text-align: center; }
-  canvas { display:block; max-width:100%; height:auto; }
+  canvas { display:block; max-width:100%; height:auto; margin-top:10px; border:1px solid #ccc; border-radius:6px; background:#e0e0e0; }
 </style>
 </head>
 <body>
@@ -91,7 +89,6 @@
   <!-- PAGE 4 -->
   <div class="page" id="page-4">
     <div class="results-container" id="results"></div>
-    <!-- ✅ Send to QA button -->
     <button id="sendQA" onclick="sendToQA()">Send to QA</button>
     <button onclick="prevPage()">Previous</button>
   </div>
@@ -100,96 +97,117 @@
 
 <script>
 /* ---------- Page Navigation ---------- */
-let lastResults = []; // holds TI/HI/Total per slot
+let lastResults = [];
 let currentPage = 1;
-function showPage(n) {
-  document.querySelectorAll('.page').forEach((p, i) => {
-    p.style.display = (i + 1 === n) ? 'block' : 'none';
-  });
-  currentPage = n;
-}
-function nextPage() { if (currentPage < 4) showPage(currentPage + 1); }
-function prevPage() { if (currentPage > 1) showPage(currentPage - 1); }
+function showPage(n){document.querySelectorAll('.page').forEach((p,i)=>p.style.display=(i+1===n)?'block':'none');currentPage=n;}
+function nextPage(){if(currentPage<4)showPage(currentPage+1);}
+function prevPage(){if(currentPage>1)showPage(currentPage-1);}
 
 /* ---------- Packing Strategies ---------- */
-function packAllUnrotated(palletL,palletW,boxL,boxW){const fitL=Math.floor(palletL/boxL);const fitW=Math.floor(palletW/boxW);const placements=[];for(let i=0;i<fitL;i++){for(let j=0;j<fitW;j++){placements.push({x:i*boxL,y:j*boxW,w:boxL,h:boxW,rot:0});}}return placements;}
-function packAllRotated(palletL,palletW,boxL,boxW){const fitL=Math.floor(palletL/boxW);const fitW=Math.floor(palletW/boxL);const placements=[];for(let i=0;i<fitL;i++){for(let j=0;j<fitW;j++){placements.push({x:i*boxW,y:j*boxL,w:boxW,h:boxL,rot:1});}}return placements;}
-function packAlternatingRows(palletL,palletW,boxL,boxW){const placements=[];let y=0;let toggle=false;while(y+Math.min(boxW,boxL)<=palletW){if(!toggle){const fitL=Math.floor(palletL/boxL);for(let i=0;i<fitL;i++){placements.push({x:i*boxL,y,w:boxL,h:boxW,rot:0});}y+=boxW;}else{const fitL=Math.floor(palletL/boxW);for(let i=0;i<fitL;i++){placements.push({x:i*boxW,y,w:boxW,h:boxL,rot:1});}y+=boxL;}toggle=!toggle;}return placements;}
-function packLayer(palletL,palletW,boxL,boxW){let freeRects=[{x:0,y:0,w:palletL,h:palletW}];const placements=[];const boxArea=boxL*boxW;while(true){let best=null;for(let ri=0;ri<freeRects.length;ri++){const r=freeRects[ri];if(boxL<=r.w&&boxW<=r.h){const waste=r.w*r.h-boxArea;if(!best||waste<best.waste)best={ri,place:{x:r.x,y:r.y,w:boxL,h:boxW},rot:0,waste};}if(boxW<=r.w&&boxL<=r.h){const waste=r.w*r.h-boxArea;if(!best||waste<best.waste)best={ri,place:{x:r.x,y:r.y,w:boxW,h:boxL},rot:1,waste};}}if(!best)break;placements.push({...best.place,rot:best.rot});const used=freeRects[best.ri];freeRects.splice(best.ri,1);const rightW=used.w-best.place.w;if(rightW>0)freeRects.push({x:used.x+best.place.w,y:used.y,w:rightW,h:best.place.h});const bottomH=used.h-best.place.h;if(bottomH>0)freeRects.push({x:used.x,y:used.y+best.place.h,w:used.w,h:bottomH});}return placements;}
-function chooseBestPacking(palletL,palletW,boxL,boxW){const strategies=[{name:"All Unrotated",placements:packAllUnrotated(palletL,palletW,boxL,boxW)},{name:"All Rotated",placements:packAllRotated(palletL,palletW,boxL,boxW)},{name:"Alternating Rows",placements:packAlternatingRows(palletL,palletW,boxL,boxW)},{name:"Greedy Mixed",placements:packLayer(palletL,palletW,boxL,boxW)}];const palletArea=palletL*palletW;strategies.forEach(s=>{const usedArea=s.placements.reduce((sum,p)=>sum+p.w*p.h,0);s.cases=s.placements.length;s.whitespace=palletArea-usedArea;});strategies.sort((a,b)=>b.cases!==a.cases?b.cases-a.cases:a.whitespace-b.whitespace);return strategies[0];}
+function packAllUnrotated(pl,pw,bl,bw){const fitL=Math.floor(pl/bl),fitW=Math.floor(pw/bw),placements=[];for(let i=0;i<fitL;i++){for(let j=0;j<fitW;j++){placements.push({x:i*bl,y:j*bw,w:bl,h:bw,rot:0});}}return placements;}
+function packAllRotated(pl,pw,bl,bw){const fitL=Math.floor(pl/bw),fitW=Math.floor(pw/bl),placements=[];for(let i=0;i<fitL;i++){for(let j=0;j<fitW;j++){placements.push({x:i*bw,y:j*bl,w:bw,h:bl,rot:1});}}return placements;}
+function packAlternatingRows(pl,pw,bl,bw){const placements=[];let y=0,toggle=false;while(y+Math.min(bw,bl)<=pw){if(!toggle){const fitL=Math.floor(pl/bl);for(let i=0;i<fitL;i++){placements.push({x:i*bl,y,w:bl,h:bw,rot:0});}y+=bw;}else{const fitL=Math.floor(pl/bw);for(let i=0;i<fitL;i++){placements.push({x:i*bw,y,w:bw,h:bl,rot:1});}y+=bl;}toggle=!toggle;}return placements;}
+function packLayer(pl,pw,bl,bw){let freeRects=[{x:0,y:0,w:pl,h:pw}],placements=[],boxArea=bl*bw;while(true){let best=null;for(let ri=0;ri<freeRects.length;ri++){const r=freeRects[ri];if(bl<=r.w&&bw<=r.h){const waste=r.w*r.h-boxArea;if(!best||waste<best.waste)best={ri,place:{x:r.x,y:r.y,w:bl,h:bw},rot:0,waste};}
+if(bw<=r.w&&bl<=r.h){const waste=r.w*r.h-boxArea;if(!best||waste<best.waste)best={ri,place:{x:r.x,y:r.y,w:bw,h:bl},rot:1,waste};}}if(!best)break;
+placements.push({...best.place,rot:best.rot});const used=freeRects[best.ri];freeRects.splice(best.ri,1);
+const rightW=used.w-best.place.w;if(rightW>0)freeRects.push({x:used.x+best.place.w,y:used.y,w:rightW,h:best.place.h});
+const bottomH=used.h-best.place.h;if(bottomH>0)freeRects.push({x:used.x,y:used.y+best.place.h,w:used.w,h:bottomH});}return placements;}
+function chooseBestPacking(pl,pw,bl,bw){
+  const strategies=[
+    {name:"All Unrotated",placements:packAllUnrotated(pl,pw,bl,bw)},
+    {name:"All Rotated",placements:packAllRotated(pl,pw,bl,bw)},
+    {name:"Alternating Rows",placements:packAlternatingRows(pl,pw,bl,bw)},
+    {name:"Greedy Mixed",placements:packLayer(pl,pw,bl,bw)}
+  ];
+  const palletArea=pl*pw;
+  strategies.forEach(s=>{
+    const used=s.placements.reduce((sum,p)=>sum+p.w*p.h,0);
+    s.cases=s.placements.length;
+    s.whitespace=palletArea-used;
+  });
+  strategies.sort((a,b)=>b.cases!==a.cases?b.cases-a.cases:a.whitespace-b.whitespace);
+  return strategies[0];
+}
 
-/* ---------- Main Calculate ---------- */
-function calculate() {
-  lastResults = [];
-  const boxLength = parseFloat(document.getElementById('length').value);
-  const boxWidth = parseFloat(document.getElementById('width').value);
-  const boxHeight = parseFloat(document.getElementById('height').value);
-  const palletLength = 47, palletWidth = 40;
-  const slotSizes = [...document.querySelectorAll('#slot-options input:checked')].map(el => parseInt(el.value));
-  const resultsContainer = document.getElementById('results');
-  resultsContainer.innerHTML = "";
+/* ---------- Calculate + Draw ---------- */
+function calculate(){
+  lastResults=[];
+  const bl=parseFloat(document.getElementById('length').value);
+  const bw=parseFloat(document.getElementById('width').value);
+  const bh=parseFloat(document.getElementById('height').value);
+  const palletL=47,palletW=40;
+  const slots=[...document.querySelectorAll('#slot-options input:checked')].map(e=>parseInt(e.value));
+  const results=document.getElementById('results');
+  results.innerHTML="";
 
-  if (isNaN(boxLength) || isNaN(boxWidth) || isNaN(boxHeight) ||
-      boxLength <= 0 || boxWidth <= 0 || boxHeight <= 0) {
-    resultsContainer.innerHTML = "<div class='result-card'>Please enter valid positive numbers.</div>";
-    showPage(4); return;
+  if([bl,bw,bh].some(v=>isNaN(v)||v<=0)){
+    results.innerHTML="<div class='result-card'>Please enter valid positive numbers.</div>";
+    showPage(4);return;
   }
-  if (slotSizes.length === 0) {
-    resultsContainer.innerHTML = "<div class='result-card'>Please select at least one slot size.</div>";
-    showPage(4); return;
+  if(slots.length===0){
+    results.innerHTML="<div class='result-card'>Please select at least one slot size.</div>";
+    showPage(4);return;
   }
 
-  slotSizes.forEach(slotHeight=>{
-    const hi = Math.floor(slotHeight / boxHeight);
-    if (hi<=0) {
-      resultsContainer.innerHTML += `<div class='result-card'><div class="result-header">Slot Size: ${slotHeight}"</div><div>No layers fit (too tall).</div></div>`;
+  slots.forEach(slot=>{
+    const hi=Math.floor(slot/bh);
+    if(hi<=0){
+      results.innerHTML+=`<div class='result-card'><div class="result-header">Slot Size: ${slot}"</div><div>No layers fit (too tall).</div></div>`;
       return;
     }
-    const best = chooseBestPacking(palletLength, palletWidth, boxLength, boxWidth);
-    const ti = best.cases;
-    const total = ti*hi;
-    lastResults.push({slotHeight, TI: ti, HI: hi, Total: total, Strategy: best.name});
+    const best=chooseBestPacking(palletL,palletW,bl,bw);
+    const ti=best.cases,total=ti*hi;
+    lastResults.push({slotHeight:slot,TI:ti,HI:hi,Total:total,Strategy:best.name});
 
     const card=document.createElement('div');
     card.className="result-card";
     card.innerHTML=`
-      <div class="result-header">Slot Size: ${slotHeight}"</div>
+      <div class="result-header">Slot Size: ${slot}"</div>
       <div class="result-metrics">
-        <span>TI: <span class="highlight">${ti}</span></span>
-        <span>HI: <span class="highlight">${hi}</span></span>
+        <span>TI (per layer): <span class="highlight">${ti}</span></span>
+        <span>HI (layers): <span class="highlight">${hi}</span></span>
         <span>Total: <span class="highlight">${total}</span></span>
       </div>
       <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:6px; font-size:0.9em;">
         Strategy: <strong>${best.name}</strong>
       </div>
     `;
-    resultsContainer.appendChild(card);
-  });
 
+    const canvas=document.createElement('canvas');
+    canvas.width=400; canvas.height=340;
+    card.appendChild(canvas);
+    const ctx=canvas.getContext('2d');
+    const scaleX=canvas.width/palletL, scaleY=canvas.height/palletW;
+
+    best.placements.forEach(p=>{
+      ctx.fillStyle=p.rot?'#0071ce':'#ffc220'; // rotated = blue, unrotated = yellow
+      ctx.fillRect(p.x*scaleX,p.y*scaleY,p.w*scaleX,p.h*scaleY);
+      ctx.strokeStyle='#000';
+      ctx.strokeRect(p.x*scaleX,p.y*scaleY,p.w*scaleX,p.h*scaleY);
+    });
+
+    results.appendChild(card);
+  });
   showPage(4);
 }
 
 /* ---------- Send To QA ---------- */
-async function sendToQA() {
-  const payload = {
-    itemNumber: document.getElementById('itemNumber').value,
-    length: document.getElementById('length').value,
-    width:  document.getElementById('width').value,
-    height: document.getElementById('height').value,
-    slotResults: lastResults // array of TI/HI results
+async function sendToQA(){
+  const payload={
+    itemNumber:document.getElementById('itemNumber').value,
+    length:document.getElementById('length').value,
+    width:document.getElementById('width').value,
+    height:document.getElementById('height').value,
+    slotResults:lastResults
   };
-
-  try {
-    const resp = await fetch('/api/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+  try{
+    const resp=await fetch('/api/submit',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
     });
-    const data = await resp.json();
-    console.log(data);
-    if (!resp.ok) throw new Error(data.error || 'Error sending to Smartsheet');
+    const data=await resp.json();
+    if(!resp.ok)throw new Error(data.error||'Error sending to Smartsheet');
     alert('✅ Sent to Smartsheet!');
-  } catch (err) {
+  }catch(err){
     console.error(err);
     alert('❌ Failed to send to Smartsheet');
   }
