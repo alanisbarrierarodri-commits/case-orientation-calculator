@@ -136,94 +136,107 @@ function chooseBestPacking(pl,pw,bl,bw){
 }
 
 /* ---------- Calculate + Draw ---------- */
-function calculate(){
-  lastResults=[];
-  const bl=parseFloat(document.getElementById('length').value);
-  const bw=parseFloat(document.getElementById('width').value);
-  const bh=parseFloat(document.getElementById('height').value);
-  const palletL=47,palletW=40;
-  const slots=[...document.querySelectorAll('#slot-options input:checked')].map(e=>parseInt(e.value));
-  const results=document.getElementById('results');
-  results.innerHTML="";
+function calculate() {
+    lastResults = [];
+    const bl = parseFloat(document.getElementById('length').value);
+    const bw = parseFloat(document.getElementById('width').value);
+    const bh = parseFloat(document.getElementById('height').value);
+    const palletL = 47, palletW = 40;
+    const slots = [...document.querySelectorAll('#slot-options input:checked')].map(e => parseInt(e.value));
+    const results = document.getElementById('results');
+    results.innerHTML = "";
 
-  if([bl,bw,bh].some(v=>isNaN(v)||v<=0)){
-    results.innerHTML="<div class='result-card'>Please enter valid positive numbers.</div>";
-    showPage(4);return;
-  }
-  if(slots.length===0){
-    results.innerHTML="<div class='result-card'>Please select at least one slot size.</div>";
-    showPage(4);return;
-  }
-
-  slots.forEach(slot=>{
-    const hi=Math.floor(slot/bh);
-    if(hi<=0){
-      results.innerHTML+=`<div class='result-card'><div class="result-header">Slot Size: ${slot}"</div><div>No layers fit (too tall).</div></div>`;
-      return;
+    if ([bl, bw, bh].some(v => isNaN(v) || v <= 0)) {
+        results.innerHTML = "<div class='result-card'>Please enter valid positive numbers.</div>";
+        showPage(4);
+        return;
     }
-    const best=chooseBestPacking(palletL,palletW,bl,bw);
-    const ti=best.cases,total=ti*hi;
-    lastResults.push({slotHeight:slot,TI:ti,HI:hi,Total:total,Strategy:best.name});
 
-const card = document.createElement('div');
-card.className = "result-card";
-card.innerHTML = `
-  <div class="result-header">Slot Size: ${slot}"</div>
-  <div class="result-metrics">
-    <span>TI (per layer): <span class="highlight">${ti}</span></span>
-    <span>HI (layers): <span class="highlight">${hi}</span></span>
-    <span>Total: <span class="highlight">${total}</span></span>
-  </div>
-`;
+    if (slots.length === 0) {
+        results.innerHTML = "<div class='result-card'>Please select at least one slot size.</div>";
+        showPage(4);
+        return;
+    }
 
-const canvas = document.createElement('canvas');
-canvas.width = 400;
-canvas.height = 360; // taller to fit legend + labels
-card.appendChild(canvas);
-const ctx = canvas.getContext('2d');
+    slots.forEach(slot => {
+        const hi = Math.floor(slot / bh);
+        if (hi <= 0) {
+            results.innerHTML += `<div class='result-card'>
+                <div class="result-header">Slot Size: ${slot}"</div>
+                <div>No layers fit (too tall).</div>
+            </div>`;
+            return;
+        }
 
-const scaleX = canvas.width / palletL;
-const scaleY = (canvas.height - 40) / palletW; // reserve 40px bottom for labels
+        const best = chooseBestPacking(palletL, palletW, bl, bw);
+        const ti = best.cases, total = ti * hi;
+        lastResults.push({ slotHeight: slot, TI: ti, HI: hi, Total: total, Strategy: best.name });
 
-// 🔲 Draw pallet boundary
-ctx.strokeStyle = "#000";
-ctx.lineWidth = 2;
-ctx.strokeRect(0, 0, palletL * scaleX, palletW * scaleY);
+        // Create card
+        const card = document.createElement('div');
+        card.className = "result-card";
+        card.innerHTML = `<div class="result-header">Slot Size: ${slot}"</div>
+            <div class="result-metrics">
+                <span>TI (per layer): <span class="highlight">${ti}</span></span>
+                <span>HI (layers): <span class="highlight">${hi}</span></span>
+                <span>Total: <span class="highlight">${total}</span></span>
+            </div>`;
 
-// 🟧🟦 Draw cases
-best.placements.forEach(p => {
-  ctx.fillStyle = p.rot ? '#0071ce' : '#ffc220'; // rotated = blue, unrotated = yellow
-  ctx.fillRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
-  ctx.strokeStyle = '#000';
-  ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
-});
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 360; // taller to fit pallet drawing
+        card.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        const scaleX = canvas.width / palletL;
+        const scaleY = (canvas.height - 40) / palletW; // reserve 40px for bottom label
 
-//  Axis labels
-ctx.fillStyle = "#000";
-ctx.font = "14px Arial";
+        // Draw pallet boundary
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(0, 0, palletL * scaleX, palletW * scaleY);
 
-// bottom label centered
-const bottomText = '47" (Longest Side)';
-const bottomWidth = ctx.measureText(bottomText).width;
-ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
+        // Draw cases
+        best.placements.forEach(p => {
+            ctx.fillStyle = p.rot ? '#0071ce' : '#ffc220'; // rotated = blue, unrotated = yellow
+            ctx.fillRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
+            ctx.strokeStyle = '#000';
+            ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
+        });
 
-// 🔲 Draw legend next to bottom label
-const legendX = (canvas.width + bottomWidth) / 2 + 10; // start a little right of bottom label
-const legendY = canvas.height - 40;
+        // Bottom label
+        ctx.fillStyle = "#000";
+        ctx.font = "14px Arial";
+        const bottomText = '47" (Longest Side)';
+        const bottomWidth = ctx.measureText(bottomText).width;
+        ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
 
-ctx.fillStyle = "#ffc220"; // unrotated
-ctx.fillRect(legendX, legendY, 20, 20);
-ctx.fillStyle = "#000";
-ctx.fillText("Unrotated", legendX + 25, legendY + 15);
+        // Append legend below canvas in HTML
+        const legend = document.createElement('div');
+        legend.style.marginTop = '10px';
+        legend.style.display = 'flex';
+        legend.style.gap = '20px';
+        legend.style.alignItems = 'center';
 
-ctx.fillStyle = "#0071ce"; // rotated
-ctx.fillRect(legendX, legendY + 25, 20, 20);
-ctx.fillStyle = "#000";
-ctx.fillText("Rotated", legendX + 25, legendY + 40);
-    
-results.appendChild(card);
-  });
-  showPage(4);
+        // Unrotated
+        const unrotated = document.createElement('div');
+        unrotated.style.display = 'flex';
+        unrotated.style.alignItems = 'center';
+        unrotated.innerHTML = `<div style="width:20px;height:20px;background:#ffc220;margin-right:5px;border:1px solid #000;"></div>Unrotated`;
+        legend.appendChild(unrotated);
+
+        // Rotated
+        const rotated = document.createElement('div');
+        rotated.style.display = 'flex';
+        rotated.style.alignItems = 'center';
+        rotated.innerHTML = `<div style="width:20px;height:20px;background:#0071ce;margin-right:5px;border:1px solid #000;"></div>Rotated`;
+        legend.appendChild(rotated);
+
+        card.appendChild(legend);
+        results.appendChild(card);
+    });
+
+    showPage(4);
 }
 
 /* ---------- Send To QA ---------- */
