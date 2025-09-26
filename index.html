@@ -174,9 +174,6 @@ card.innerHTML = `
     <span>HI (layers): <span class="highlight">${hi}</span></span>
     <span>Total: <span class="highlight">${total}</span></span>
   </div>
-  <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:6px; font-size:0.9em;">
-    Strategy: <strong>${best.name}</strong>
-  </div>
 `;
 
 const canvas = document.createElement('canvas');
@@ -209,15 +206,6 @@ ctx.font = "14px Arial";
 const bottomText = '47" (Longest Side)';
 const bottomWidth = ctx.measureText(bottomText).width;
 ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
-
-// Left label (rotated, centered vertically, placed just outside pallet)
-ctx.save();
-ctx.translate(5, (palletW * scaleY) / 2); // 5px from left edge, vertically centered
-ctx.rotate(-Math.PI / 2);
-const sideText = '40" (Shortest Side)';
-const sideWidth = ctx.measureText(sideText).width;
-ctx.fillText(sideText, -sideWidth / 2, -5); // -5 nudges it outward from the pallet
-ctx.restore();
 
 // 🔲 Draw pallet boundary last so labels stay clear
 ctx.strokeStyle = "#000";
