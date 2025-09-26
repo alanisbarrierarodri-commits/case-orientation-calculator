@@ -165,34 +165,64 @@ function calculate(){
     const ti=best.cases,total=ti*hi;
     lastResults.push({slotHeight:slot,TI:ti,HI:hi,Total:total,Strategy:best.name});
 
-    const card=document.createElement('div');
-    card.className="result-card";
-    card.innerHTML=`
-      <div class="result-header">Slot Size: ${slot}"</div>
-      <div class="result-metrics">
-        <span>TI (per layer): <span class="highlight">${ti}</span></span>
-        <span>HI (layers): <span class="highlight">${hi}</span></span>
-        <span>Total: <span class="highlight">${total}</span></span>
-      </div>
-      <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:6px; font-size:0.9em;">
-        Strategy: <strong>${best.name}</strong>
-      </div>
-    `;
+const card = document.createElement('div');
+card.className = "result-card";
+card.innerHTML = `
+  <div class="result-header">Slot Size: ${slot}"</div>
+  <div class="result-metrics">
+    <span>TI (per layer): <span class="highlight">${ti}</span></span>
+    <span>HI (layers): <span class="highlight">${hi}</span></span>
+    <span>Total: <span class="highlight">${total}</span></span>
+  </div>
+  <div style="margin:10px 0; padding:8px; background:#fff3cd; border-left:4px solid #ffc107; border-radius:6px; font-size:0.9em;">
+    Strategy: <strong>${best.name}</strong>
+  </div>
+`;
 
-    const canvas=document.createElement('canvas');
-    canvas.width=400; canvas.height=340;
-    card.appendChild(canvas);
-    const ctx=canvas.getContext('2d');
-    const scaleX=canvas.width/palletL, scaleY=canvas.height/palletW;
+const canvas = document.createElement('canvas');
+canvas.width = 400;
+canvas.height = 360; // taller to fit legend + labels
+card.appendChild(canvas);
+const ctx = canvas.getContext('2d');
 
-    best.placements.forEach(p=>{
-      ctx.fillStyle=p.rot?'#0071ce':'#ffc220'; // rotated = blue, unrotated = yellow
-      ctx.fillRect(p.x*scaleX,p.y*scaleY,p.w*scaleX,p.h*scaleY);
-      ctx.strokeStyle='#000';
-      ctx.strokeRect(p.x*scaleX,p.y*scaleY,p.w*scaleX,p.h*scaleY);
-    });
+const scaleX = canvas.width / palletL;
+const scaleY = (canvas.height - 40) / palletW; // reserve 40px bottom for labels
 
-    results.appendChild(card);
+// 🔲 Draw pallet boundary
+ctx.strokeStyle = "#000";
+ctx.lineWidth = 2;
+ctx.strokeRect(0, 0, palletL * scaleX, palletW * scaleY);
+
+// 🟧🟦 Draw cases
+best.placements.forEach(p => {
+  ctx.fillStyle = p.rot ? '#0071ce' : '#ffc220'; // rotated = blue, unrotated = yellow
+  ctx.fillRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
+  ctx.strokeStyle = '#000';
+  ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
+});
+
+// 📏 Axis labels
+ctx.fillStyle = "#000";
+ctx.font = "14px Arial";
+ctx.fillText('47" (Longest Side)', canvas.width / 2 - 60, canvas.height - 5); // bottom
+ctx.save();
+ctx.translate(10, canvas.height / 2);
+ctx.rotate(-Math.PI / 2);
+ctx.fillText('40" (Shortest Side)', -50, 0);
+ctx.restore();
+
+// 📝 Legend (bottom-right)
+ctx.fillStyle = "#ffc220";
+ctx.fillRect(canvas.width - 120, canvas.height - 35, 15, 15);
+ctx.fillStyle = "#000";
+ctx.fillText("Unrotated", canvas.width - 100, canvas.height - 22);
+
+ctx.fillStyle = "#0071ce";
+ctx.fillRect(canvas.width - 120, canvas.height - 18, 15, 15);
+ctx.fillStyle = "#000";
+ctx.fillText("Rotated", canvas.width - 100, canvas.height - 5);
+
+results.appendChild(card);
   });
   showPage(4);
 }
