@@ -207,27 +207,19 @@ const bottomText = '47" (Longest Side)';
 const bottomWidth = ctx.measureText(bottomText).width;
 ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
 
-// 🔲 Draw pallet boundary last so labels stay clear
-ctx.strokeStyle = "#000";
-ctx.lineWidth = 2;
-ctx.strokeRect(0, 0, palletL * scaleX, palletW * scaleY);
+// 🔲 Draw legend next to bottom label
+const legendX = (canvas.width + bottomWidth) / 2 + 10; // start a little right of bottom label
+const legendY = canvas.height - 40;
 
-// 🟩 Draw legend
-ctx.font = "14px Arial";
+ctx.fillStyle = "#ffc220"; // unrotated
+ctx.fillRect(legendX, legendY, 20, 20);
 ctx.fillStyle = "#000";
-ctx.fillText("Legend:", canvas.width - 120, 20);
+ctx.fillText("Unrotated", legendX + 25, legendY + 15);
 
-// Unrotated
-ctx.fillStyle = "#ffc220"; // yellow
-ctx.fillRect(canvas.width - 120, 30, 20, 20);
+ctx.fillStyle = "#0071ce"; // rotated
+ctx.fillRect(legendX, legendY + 25, 20, 20);
 ctx.fillStyle = "#000";
-ctx.fillText("Unrotated", canvas.width - 90, 45);
-
-// Rotated
-ctx.fillStyle = "#0071ce"; // blue
-ctx.fillRect(canvas.width - 120, 55, 20, 20);
-ctx.fillStyle = "#000";
-ctx.fillText("Rotated", canvas.width - 90, 70);
+ctx.fillText("Rotated", legendX + 25, legendY + 40);
     
 results.appendChild(card);
   });
