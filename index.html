@@ -205,11 +205,11 @@ async function sendToQA(){
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
     });
     const data=await resp.json();
-    if(!resp.ok)throw new Error(data.error||'Error sending to Smartsheet');
-    alert('✅ Sent to Smartsheet!');
+    if(!resp.ok)throw new Error(data.error||'Error sending to QA');
+    alert('✅ Sent to QA!');
   }catch(err){
     console.error(err);
-    alert('❌ Failed to send to Smartsheet');
+    alert('❌ Failed to send to QA');
   }
 }
 </script>
