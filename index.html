@@ -211,6 +211,23 @@ ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
 ctx.strokeStyle = "#000";
 ctx.lineWidth = 2;
 ctx.strokeRect(0, 0, palletL * scaleX, palletW * scaleY);
+
+// 🟩 Draw legend
+ctx.font = "14px Arial";
+ctx.fillStyle = "#000";
+ctx.fillText("Legend:", canvas.width - 120, 20);
+
+// Unrotated
+ctx.fillStyle = "#ffc220"; // yellow
+ctx.fillRect(canvas.width - 120, 30, 20, 20);
+ctx.fillStyle = "#000";
+ctx.fillText("Unrotated", canvas.width - 90, 45);
+
+// Rotated
+ctx.fillStyle = "#0071ce"; // blue
+ctx.fillRect(canvas.width - 120, 55, 20, 20);
+ctx.fillStyle = "#000";
+ctx.fillText("Rotated", canvas.width - 90, 70);
     
 results.appendChild(card);
   });
