@@ -4,13 +4,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { itemNumber, length, width, height, slotResults } = req.body;
+    const {dcNumber, itemNumber, length, width, height, slotResults } = req.body;
 
     if (!Array.isArray(slotResults) || slotResults.length === 0) {
       return res.status(400).json({ error: "No slot results provided" });
     }
 
     const COLUMNS = {
+      DC: 3035087663484804,
       ITEM: 1275484055490436,
       HEIGHT: 3527283869175684,
       LENGTH: 8030883496546180,
@@ -23,6 +24,7 @@ export default async function handler(req, res) {
     const rows = slotResults.map(r => ({
       toTop: true,
       cells: [
+        { columnId: COLUMNS.DC,      value: dcNumber },
         { columnId: COLUMNS.ITEM,      value: itemNumber },
         { columnId: COLUMNS.HEIGHT,    value: height },
         { columnId: COLUMNS.LENGTH,    value: length },
