@@ -36,6 +36,12 @@
 
   <!-- PAGE 1 -->
   <div class="page" id="page-1" style="display:block;">
+      <!-- DC Dropdown -->
+    <label for="dcNumber">DC:</label>
+    <select id="dcNumber">
+      <option value="7035">7035</option>
+    </select>
+
     <label for="itemNumber">Item #:</label>
     <input type="text" id="itemNumber">
     <div style="text-align: center; margin: 10px 0;">
@@ -194,6 +200,7 @@ function calculate(){
 /* ---------- Send To QA ---------- */
 async function sendToQA(){
   const payload={
+    dcNumber: document.getElementById('dcNumber').value,
     itemNumber:document.getElementById('itemNumber').value,
     length:document.getElementById('length').value,
     width:document.getElementById('width').value,
