@@ -122,6 +122,7 @@ function pushIfFits(placements, x, y, w, h, rot, palletL, palletW) {
 }
 
 function packAllUnrotated(pl, pw, bl, bw) {
+    if (bl <= 0 || bw <= 0) return [];
     const fitL = Math.floor(pl / bl);
     const fitW = Math.floor(pw / bw);
     const placements = [];
@@ -134,6 +135,7 @@ function packAllUnrotated(pl, pw, bl, bw) {
 }
 
 function packAllRotated(pl, pw, bl, bw) {
+    if (bw <= 0 || bl <= 0) return [];
     const fitL = Math.floor(pl / bw);
     const fitW = Math.floor(pw / bl);
     const placements = [];
@@ -145,17 +147,22 @@ function packAllRotated(pl, pw, bl, bw) {
     return placements;
 }
 
+
 function packAlternatingRows(pl, pw, bl, bw) {
     const placements = [];
     let y = 0, toggle = false;
     while (y + Math.min(bl, bw) <= pw) {
         if (!toggle) {
             const fitL = Math.floor(pl / bl);
-            for (let i = 0; i < fitL; i++) pushIfFits(placements, i * bl, y, bl, bw, 0, pl, pw);
+            for (let i = 0; i < fitL; i++) {
+                pushIfFits(placements, i * bl, y, bl, bw, 0, pl, pw);
+            }
             y += bw;
         } else {
             const fitL = Math.floor(pl / bw);
-            for (let i = 0; i < fitL; i++) pushIfFits(placements, i * bw, y, bw, bl, 1, pl, pw);
+            for (let i = 0; i < fitL; i++) {
+                pushIfFits(placements, i * bw, y, bw, bl, 1, pl, pw);
+            }
             y += bl;
         }
         toggle = !toggle;
@@ -165,52 +172,63 @@ function packAlternatingRows(pl, pw, bl, bw) {
 
 function packLayer(pl, pw, bl, bw) {
     const placements = [];
-    let freeRects = [{ x:0, y:0, w:pl, h:pw }];
-    while(freeRects.length > 0){
+    let freeRects = [{ x: 0, y: 0, w: pl, h: pw }];
+    while (freeRects.length > 0) {
         let placed = false;
-        for(let i=0;i<freeRects.length;i++){
+        for (let i = 0; i < freeRects.length; i++) {
             const r = freeRects[i];
-            // unrotated
-            if(bl<=r.w && bw<=r.h){
-                pushIfFits(placements,r.x,r.y,bl,bw,0,pl,pw);
+            // Try unrotated
+            if (bl <= r.w && bw <= r.h) {
+                pushIfFits(placements, r.x, r.y, bl, bw, 0, pl, pw);
                 const rightW = r.w - bl, bottomH = r.h - bw;
-                freeRects.splice(i,1);
-                if(rightW>0) freeRects.push({x:r.x+bl, y:r.y, w:rightW, h:r.h});
-                if(bottomH>0) freeRects.push({x:r.x, y:r.y+bw, w:r.w, h:bottomH});
-                placed = true; break;
+                freeRects.splice(i, 1);
+                if (rightW > 0) freeRects.push({ x: r.x + bl, y: r.y, w: rightW, h: r.h });
+                if (bottomH > 0) freeRects.push({ x: r.x, y: r.y + bw, w: r.w, h: bottomH });
+                placed = true;
+                break;
             }
-            // rotated
-            if(bw<=r.w && bl<=r.h){
-                pushIfFits(placements,r.x,r.y,bw,bl,1,pl,pw);
+            // Try rotated
+            if (bw <= r.w && bl <= r.h) {
+                pushIfFits(placements, r.x, r.y, bw, bl, 1, pl, pw);
                 const rightW = r.w - bw, bottomH = r.h - bl;
-                freeRects.splice(i,1);
-                if(rightW>0) freeRects.push({x:r.x+bw, y:r.y, w:rightW, h:r.h});
-                if(bottomH>0) freeRects.push({x:r.x, y:r.y+bl, w:r.w, h:bottomH});
-                placed = true; break;
+                freeRects.splice(i, 1);
+                if (rightW > 0) freeRects.push({ x: r.x + bw, y: r.y, w: rightW, h: r.h });
+                if (bottomH > 0) freeRects.push({ x: r.x, y: r.y + bl, w: r.w, h: bottomH });
+                placed = true;
+                break;
             }
         }
-        if(!placed) break;
+        if (!placed) break;
     }
     return placements;
 }
 
-function chooseBestPacking(pl, pw, bl, bw){
-    if(bl < bw) [bl,bw] = [bw,bl];
+
+function chooseBestPacking(pl, pw, bl, bw) {
+    if (bl <= 0 || bw <= 0 || pl <= 0 || pw <= 0) return { name: "Invalid", placements: [] };
+    if (bl < bw) [bl, bw] = [bw, bl];
+
     const strategies = [
-        {name:"All Unrotated", placements: packAllUnrotated(pl,pw,bl,bw)},
-        {name:"All Rotated", placements: packAllRotated(pl,pw,bl,bw)},
-        {name:"Alternating Rows", placements: packAlternatingRows(pl,pw,bl,bw)},
-        {name:"Greedy Mixed", placements: packLayer(pl,pw,bl,bw)}
+        { name: "All Unrotated", placements: packAllUnrotated(pl, pw, bl, bw) },
+        { name: "All Rotated", placements: packAllRotated(pl, pw, bl, bw) },
+        { name: "Alternating Rows", placements: packAlternatingRows(pl, pw, bl, bw) },
+        { name: "Greedy Mixed", placements: packLayer(pl, pw, bl, bw) }
     ];
-    const palletArea = pl*pw;
-    strategies.forEach(s=>{
-        const usedArea = s.placements.reduce((sum,p)=>sum+p.w*p.h,0);
+
+    const palletArea = pl * pw;
+    strategies.forEach(s => {
+        const usedArea = s.placements.reduce((sum, p) => sum + p.w * p.h, 0);
         s.cases = s.placements.length;
-        s.whitespace = palletArea-usedArea;
+        s.whitespace = palletArea - usedArea;
     });
-    strategies.sort((a,b)=>b.cases - a.cases || a.whitespace - b.whitespace);
-    return strategies[0];
+
+    // Filter out unrealistic results
+    const filtered = strategies.filter(s => s.cases < 1000); // Arbitrary upper limit
+    filtered.sort((a, b) => b.cases - a.cases || a.whitespace - b.whitespace);
+
+    return filtered[0] || { name: "None Fit", placements: [] };
 }
+
 
 /* ---------- Calculate + Draw ---------- */
 function calculate(){
