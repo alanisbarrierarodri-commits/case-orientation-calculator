@@ -204,42 +204,47 @@ function calculate() {
             ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
         });
 
-        // Bottom label
+        // Bottom label on canvas
         ctx.fillStyle = "#000";
         ctx.font = "14px Arial";
         const bottomText = '47" (Longest Side)';
         const bottomWidth = ctx.measureText(bottomText).width;
         ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
 
-        // Append legend below canvas in HTML
-        const legend = document.createElement('div');
-        legend.style.marginTop = '10px';
-        legend.style.display = 'flex';
-        legend.style.gap = '20px';
-        legend.style.alignItems = 'center';
+        // ---------- Legend outside the grey pallet ----------
+        const legendContainer = document.createElement('div');
+        legendContainer.style.marginTop = '10px';
+        legendContainer.style.display = 'flex';
+        legendContainer.style.gap = '20px';
+        legendContainer.style.alignItems = 'center';
+        legendContainer.style.paddingTop = '5px';
+        legendContainer.style.borderTop = '1px solid #ccc'; // separation line
 
         // Unrotated
         const unrotated = document.createElement('div');
         unrotated.style.display = 'flex';
         unrotated.style.alignItems = 'center';
         unrotated.innerHTML = `<div style="width:20px;height:20px;background:#ffc220;margin-right:5px;border:1px solid #000;"></div>Unrotated`;
-        legend.appendChild(unrotated);
+        legendContainer.appendChild(unrotated);
 
         // Rotated
         const rotated = document.createElement('div');
         rotated.style.display = 'flex';
         rotated.style.alignItems = 'center';
         rotated.innerHTML = `<div style="width:20px;height:20px;background:#0071ce;margin-right:5px;border:1px solid #000;"></div>Rotated`;
-        legend.appendChild(rotated);
+        legendContainer.appendChild(rotated);
 
-        card.appendChild(legend);
+        // Append legend to card
+        card.appendChild(legendContainer);
+
+        // Add card to results
         results.appendChild(card);
     });
 
     showPage(4);
 }
 
-/* ---------- Send To QA ---------- */
+  /* ---------- Send To QA ---------- */
 async function sendToQA(){
   const payload={
     dcNumber: document.getElementById('dcNumber').value,
