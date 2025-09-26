@@ -201,27 +201,29 @@ best.placements.forEach(p => {
   ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
 });
 
-// 📏 Axis labels
+//  Axis labels
 ctx.fillStyle = "#000";
 ctx.font = "14px Arial";
-ctx.fillText('47" (Longest Side)', canvas.width / 2 - 60, canvas.height - 5); // bottom
+
+// bottom label centered
+const bottomText = '47" (Longest Side)';
+const bottomWidth = ctx.measureText(bottomText).width;
+ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
+
+// Left label (rotated, centered vertically, placed just outside pallet)
 ctx.save();
-ctx.translate(10, canvas.height / 2);
+ctx.translate(5, (palletW * scaleY) / 2); // 5px from left edge, vertically centered
 ctx.rotate(-Math.PI / 2);
-ctx.fillText('40" (Shortest Side)', -50, 0);
+const sideText = '40" (Shortest Side)';
+const sideWidth = ctx.measureText(sideText).width;
+ctx.fillText(sideText, -sideWidth / 2, -5); // -5 nudges it outward from the pallet
 ctx.restore();
 
-// 📝 Legend (bottom-right)
-ctx.fillStyle = "#ffc220";
-ctx.fillRect(canvas.width - 120, canvas.height - 35, 15, 15);
-ctx.fillStyle = "#000";
-ctx.fillText("Unrotated", canvas.width - 100, canvas.height - 22);
-
-ctx.fillStyle = "#0071ce";
-ctx.fillRect(canvas.width - 120, canvas.height - 18, 15, 15);
-ctx.fillStyle = "#000";
-ctx.fillText("Rotated", canvas.width - 100, canvas.height - 5);
-
+// 🔲 Draw pallet boundary last so labels stay clear
+ctx.strokeStyle = "#000";
+ctx.lineWidth = 2;
+ctx.strokeRect(0, 0, palletL * scaleX, palletW * scaleY);
+    
 results.appendChild(card);
   });
   showPage(4);
