@@ -173,45 +173,47 @@ function packAlternatingRows(pl, pw, bl, bw) {
 function packLayer(pl, pw, bl, bw) {
     const placements = [];
     let freeRects = [{ x: 0, y: 0, w: pl, h: pw }];
+    const maxCases = Math.floor((pl * pw) / (bl * bw)); // hard upper bound
 
-    while (freeRects.length > 0) {
+    while (freeRects.length > 0 && placements.length < maxCases) {
         let placed = false;
 
         for (let i = 0; i < freeRects.length; i++) {
             const r = freeRects[i];
 
-            // Try unrotated (full case only)
+            // Try unrotated
             if (bl <= r.w && bw <= r.h) {
                 placements.push({ x: r.x, y: r.y, w: bl, h: bw, rot: 0 });
                 freeRects.splice(i, 1);
 
-                // Only keep leftovers that can fit at least one full case
-                if (r.w - bl >= bl) freeRects.push({ x: r.x + bl, y: r.y, w: r.w - bl, h: r.h });
-                if (r.h - bw >= bw) freeRects.push({ x: r.x, y: r.y + bw, w: r.w, h: r.h - bw });
+                if (r.w - bl >= bl && r.h >= bw) freeRects.push({ x: r.x + bl, y: r.y, w: r.w - bl, h: r.h });
+                if (r.h - bw >= bw && r.w >= bl) freeRects.push({ x: r.x, y: r.y + bw, w: r.w, h: r.h - bw });
                 placed = true;
                 break;
             }
 
-            // Try rotated (full case only)
+            // Try rotated
             if (bw <= r.w && bl <= r.h) {
                 placements.push({ x: r.x, y: r.y, w: bw, h: bl, rot: 1 });
                 freeRects.splice(i, 1);
 
-                if (r.w - bw >= bw) freeRects.push({ x: r.x + bw, y: r.y, w: r.w - bw, h: r.h });
-                if (r.h - bl >= bl) freeRects.push({ x: r.x, y: r.y + bl, w: r.w, h: r.h - bl });
+                if (r.w - bw >= bw && r.h >= bl) freeRects.push({ x: r.x + bw, y: r.y, w: r.w - bw, h: r.h });
+                if (r.h - bl >= bl && r.w >= bw) freeRects.push({ x: r.x, y: r.y + bl, w: r.w, h: r.h - bl });
                 placed = true;
                 break;
             }
         }
 
-        if (!placed) break; // stop if no full case fits
+        if (!placed) break;
     }
 
     return placements;
 }
 
 function chooseBestPacking(pl, pw, bl, bw) {
-    if (bl <= 0 || bw <= 0 || pl <= 0 || pw <= 0) return { name: "Invalid", placements: [] };
+    if (bl <= 0 || bw <= 0 || pl <= 0 || pw <= 0) {
+        return { name: "Invalid", placements: [] };
+    }
     if (bl < bw) [bl, bw] = [bw, bl];
 
     const strategies = [
@@ -222,19 +224,26 @@ function chooseBestPacking(pl, pw, bl, bw) {
     ];
 
     const palletArea = pl * pw;
+    const maxCases = Math.floor(palletArea / (bl * bw)); // absolute physical max
+
     strategies.forEach(s => {
         const usedArea = s.placements.reduce((sum, p) => sum + p.w * p.h, 0);
         s.cases = s.placements.length;
         s.whitespace = palletArea - usedArea;
+
+        // 🚫 apply safety cap
+        if (s.cases > maxCases) {
+            s.cases = maxCases;
+            s.placements = s.placements.slice(0, maxCases);
+        }
     });
 
-    // Filter out unrealistic results
-    const filtered = strategies.filter(s => s.cases < 1000); // Arbitrary upper limit
+    // Filter & sort after cap
+    const filtered = strategies.filter(s => s.cases > 0);
     filtered.sort((a, b) => b.cases - a.cases || a.whitespace - b.whitespace);
 
     return filtered[0] || { name: "None Fit", placements: [] };
 }
-
 
 /* ---------- Calculate + Draw ---------- */
 function calculate(){
