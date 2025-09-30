@@ -173,36 +173,42 @@ function packAlternatingRows(pl, pw, bl, bw) {
 function packLayer(pl, pw, bl, bw) {
     const placements = [];
     let freeRects = [{ x: 0, y: 0, w: pl, h: pw }];
+
     while (freeRects.length > 0) {
         let placed = false;
+
         for (let i = 0; i < freeRects.length; i++) {
             const r = freeRects[i];
-            // Try unrotated
+
+            // Try unrotated (full case only)
             if (bl <= r.w && bw <= r.h) {
-                pushIfFits(placements, r.x, r.y, bl, bw, 0, pl, pw);
-                const rightW = r.w - bl, bottomH = r.h - bw;
+                placements.push({ x: r.x, y: r.y, w: bl, h: bw, rot: 0 });
                 freeRects.splice(i, 1);
-                if (rightW > 0) freeRects.push({ x: r.x + bl, y: r.y, w: rightW, h: r.h });
-                if (bottomH > 0) freeRects.push({ x: r.x, y: r.y + bw, w: r.w, h: bottomH });
+
+                // Only keep leftovers that can fit at least one full case
+                if (r.w - bl >= bl) freeRects.push({ x: r.x + bl, y: r.y, w: r.w - bl, h: r.h });
+                if (r.h - bw >= bw) freeRects.push({ x: r.x, y: r.y + bw, w: r.w, h: r.h - bw });
                 placed = true;
                 break;
             }
-            // Try rotated
+
+            // Try rotated (full case only)
             if (bw <= r.w && bl <= r.h) {
-                pushIfFits(placements, r.x, r.y, bw, bl, 1, pl, pw);
-                const rightW = r.w - bw, bottomH = r.h - bl;
+                placements.push({ x: r.x, y: r.y, w: bw, h: bl, rot: 1 });
                 freeRects.splice(i, 1);
-                if (rightW > 0) freeRects.push({ x: r.x + bw, y: r.y, w: rightW, h: r.h });
-                if (bottomH > 0) freeRects.push({ x: r.x, y: r.y + bl, w: r.w, h: bottomH });
+
+                if (r.w - bw >= bw) freeRects.push({ x: r.x + bw, y: r.y, w: r.w - bw, h: r.h });
+                if (r.h - bl >= bl) freeRects.push({ x: r.x, y: r.y + bl, w: r.w, h: r.h - bl });
                 placed = true;
                 break;
             }
         }
-        if (!placed) break;
+
+        if (!placed) break; // stop if no full case fits
     }
+
     return placements;
 }
-
 
 function chooseBestPacking(pl, pw, bl, bw) {
     if (bl <= 0 || bw <= 0 || pl <= 0 || pw <= 0) return { name: "Invalid", placements: [] };
