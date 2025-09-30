@@ -113,173 +113,38 @@ function nextPage(){if(currentPage<4)showPage(currentPage+1);}
 function prevPage(){if(currentPage>1)showPage(currentPage-1);}
 
 /* ---------- Packing Strategies with boundary checks ---------- */
-function pushIfFits(placements, x, y, w, h, rot, palletL, palletW) {
-    if (x + w <= palletL && y + h <= palletW) {
-        placements.push({ x, y, w, h, rot });
-        return true;
-    }
-    return false;
-}
+function packSimple(pl, pw, bl, bw) {
+    const placements = [];
 
-function packAllUnrotated(pl, pw, bl, bw) {
-    if (bl <= 0 || bw <= 0) return [];
+    // Unrotated fit
     const fitL = Math.floor(pl / bl);
     const fitW = Math.floor(pw / bw);
-    const placements = [];
-    for (let i = 0; i < fitL; i++) {
-        for (let j = 0; j < fitW; j++) {
-            pushIfFits(placements, i * bl, j * bw, bl, bw, 0, pl, pw);
-        }
-    }
-    return placements;
-}
+    const countUnrotated = fitL * fitW;
 
-function packAllRotated(pl, pw, bl, bw) {
-    if (bw <= 0 || bl <= 0) return [];
-    const fitL = Math.floor(pl / bw);
-    const fitW = Math.floor(pw / bl);
-    const placements = [];
-    for (let i = 0; i < fitL; i++) {
-        for (let j = 0; j < fitW; j++) {
-            pushIfFits(placements, i * bw, j * bl, bw, bl, 1, pl, pw);
-        }
-    }
-    return placements;
-}
+    // Rotated fit
+    const fitLRot = Math.floor(pl / bw);
+    const fitWRot = Math.floor(pw / bl);
+    const countRotated = fitLRot * fitWRot;
 
-
-function packAlternatingRows(pl, pw, bl, bw) {
-    const placements = [];
-    let y = 0, toggle = false;
-    while (y + Math.min(bl, bw) <= pw) {
-        if (!toggle) {
-            const fitL = Math.floor(pl / bl);
-            for (let i = 0; i < fitL; i++) {
-                pushIfFits(placements, i * bl, y, bl, bw, 0, pl, pw);
-            }
-            y += bw;
-        } else {
-            const fitL = Math.floor(pl / bw);
-            for (let i = 0; i < fitL; i++) {
-                pushIfFits(placements, i * bw, y, bw, bl, 1, pl, pw);
-            }
-            y += bl;
-        }
-        toggle = !toggle;
-    }
-    return placements;
-}
-
-function packLayer(pl, pw, bl, bw) {
-    const placements = [];
-    let freeRects = [{ x: 0, y: 0, w: pl, h: pw }];
-    const maxCases = Math.floor((pl * pw) / (bl * bw)); // hard upper bound
-
-    while (freeRects.length > 0 && placements.length < maxCases) {
-        let placed = false;
-
-        for (let i = 0; i < freeRects.length; i++) {
-            const r = freeRects[i];
-
-            // Try unrotated
-            if (bl <= r.w && bw <= r.h) {
-                placements.push({ x: r.x, y: r.y, w: bl, h: bw, rot: 0 });
-                freeRects.splice(i, 1);
-
-                if (r.w - bl >= bl && r.h >= bw) freeRects.push({ x: r.x + bl, y: r.y, w: r.w - bl, h: r.h });
-                if (r.h - bw >= bw && r.w >= bl) freeRects.push({ x: r.x, y: r.y + bw, w: r.w, h: r.h - bw });
-                placed = true;
-                break;
-            }
-
-            // Try rotated
-            if (bw <= r.w && bl <= r.h) {
-                placements.push({ x: r.x, y: r.y, w: bw, h: bl, rot: 1 });
-                freeRects.splice(i, 1);
-
-                if (r.w - bw >= bw && r.h >= bl) freeRects.push({ x: r.x + bw, y: r.y, w: r.w - bw, h: r.h });
-                if (r.h - bl >= bl && r.w >= bw) freeRects.push({ x: r.x, y: r.y + bl, w: r.w, h: r.h - bl });
-                placed = true;
-                break;
+    if (countRotated > countUnrotated) {
+        // Use rotated
+        for (let i = 0; i < fitLRot; i++) {
+            for (let j = 0; j < fitWRot; j++) {
+                placements.push({ x: i * bw, y: j * bl, w: bw, h: bl, rot: 1 });
             }
         }
-
-        if (!placed) break;
+        return { name: "Rotated", placements };
+    } else {
+        // Use unrotated
+        for (let i = 0; i < fitL; i++) {
+            for (let j = 0; j < fitW; j++) {
+                placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
+            }
+        }
+        return { name: "Unrotated", placements };
     }
-
-    return placements;
 }
-
-
-function packRowBased(pl, pw, bl, bw) {
-    const placements = [];
-
-    // --- Try filling unrotated first ---
-    const fullRowsL = Math.floor(pl / bl);
-    const leftoverL = pl - fullRowsL * bl;
-    const fullColsW = Math.floor(pw / bw);
-    const leftoverW = pw - fullColsW * bw;
-
-    // Fill all full unrotated rows
-    for (let i = 0; i < fullRowsL; i++) {
-        for (let j = 0; j < fullColsW; j++) {
-            placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
-        }
-    }
-
-    // --- Option A: fill leftover length with rotated cases ---
-    if (leftoverL >= bw) {
-        for (let j = 0; j < Math.floor(pw / bl); j++) {
-            placements.push({ x: fullRowsL * bl, y: j * bl, w: bw, h: bl, rot: 1 });
-        }
-    }
-
-    // --- Option B: fill leftover width with rotated cases ---
-    if (leftoverW >= bl) {
-        for (let i = 0; i < fullRowsL; i++) {
-            placements.push({ x: i * bl, y: fullColsW * bw, w: bw, h: bl, rot: 1 });
-        }
-    }
-
-    return placements;
-}
-
-function chooseBestPacking(pl, pw, bl, bw) {
-    if (bl <= 0 || bw <= 0 || pl <= 0 || pw <= 0) {
-        return { name: "Invalid", placements: [] };
-    }
-    if (bl < bw) [bl, bw] = [bw, bl];
-
-    const strategies = [
-        { name: "All Unrotated", placements: packAllUnrotated(pl, pw, bl, bw) },
-        { name: "All Rotated", placements: packAllRotated(pl, pw, bl, bw) },
-        { name: "Alternating Rows", placements: packAlternatingRows(pl, pw, bl, bw) },
-        { name: "Greedy Mixed", placements: packLayer(pl, pw, bl, bw) },
-        { name: "Row-Based Mix", placements: packRowBased(pl, pw, bl, bw) }
-
-    ];
-
-    const palletArea = pl * pw;
-    const maxCases = Math.floor(palletArea / (bl * bw)); // absolute physical max
-
-    strategies.forEach(s => {
-        const usedArea = s.placements.reduce((sum, p) => sum + p.w * p.h, 0);
-        s.cases = s.placements.length;
-        s.whitespace = palletArea - usedArea;
-
-        // 🚫 apply safety cap
-        if (s.cases > maxCases) {
-            s.cases = maxCases;
-            s.placements = s.placements.slice(0, maxCases);
-        }
-    });
-
-    // Filter & sort after cap
-    const filtered = strategies.filter(s => s.cases > 0);
-    filtered.sort((a, b) => b.cases - a.cases || a.whitespace - b.whitespace);
-
-    return filtered[0] || { name: "None Fit", placements: [] };
-}
+  
 
 /* ---------- Calculate + Draw ---------- */
 function calculate(){
@@ -287,7 +152,11 @@ function calculate(){
     const bl = parseFloat(document.getElementById('length').value);
     const bw = parseFloat(document.getElementById('width').value);
     const bh = parseFloat(document.getElementById('height').value);
+  
     const palletL = 48, palletW = 40;
+    const best = packSimple(palletL,palletW,bl,bw);
+    best.cases = best.placements.length;
+  
     const slots = [...document.querySelectorAll('#slot-options input:checked')].map(e=>parseInt(e.value));
     const results = document.getElementById('results');
     results.innerHTML = "";
@@ -308,7 +177,6 @@ function calculate(){
             return;
         }
 
-        const best = chooseBestPacking(palletL,palletW,bl,bw);
         const ti = best.cases, total = ti*hi;
         lastResults.push({slotHeight:slot,TI:ti,HI:hi,Total:total,Strategy:best.name});
 
