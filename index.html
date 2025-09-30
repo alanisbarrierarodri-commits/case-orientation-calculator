@@ -114,37 +114,41 @@ function prevPage(){if(currentPage>1)showPage(currentPage-1);}
 
 /* ---------- Packing Strategies with boundary checks ---------- */
 function packSimple(pl, pw, bl, bw) {
-    const placements = [];
-
-    // Unrotated fit
+    const placementsUnrot = [];
     const fitL = Math.floor(pl / bl);
     const fitW = Math.floor(pw / bw);
     const countUnrotated = fitL * fitW;
+    for (let i = 0; i < fitL; i++) {
+        for (let j = 0; j < fitW; j++) {
+            placementsUnrot.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
+        }
+    }
+    const usedAreaUnrot = countUnrotated * bl * bw;
 
-    // Rotated fit
+    const placementsRot = [];
     const fitLRot = Math.floor(pl / bw);
     const fitWRot = Math.floor(pw / bl);
     const countRotated = fitLRot * fitWRot;
+    for (let i = 0; i < fitLRot; i++) {
+        for (let j = 0; j < fitWRot; j++) {
+            placementsRot.push({ x: i * bw, y: j * bl, w: bw, h: bl, rot: 1 });
+        }
+    }
+    const usedAreaRot = countRotated * bw * bl;
 
-    if (countRotated > countUnrotated) {
-        // Use rotated
-        for (let i = 0; i < fitLRot; i++) {
-            for (let j = 0; j < fitWRot; j++) {
-                placements.push({ x: i * bw, y: j * bl, w: bw, h: bl, rot: 1 });
-            }
-        }
-        return { name: "Rotated", placements };
+    const palletArea = pl * pw;
+    const whitespaceUnrot = palletArea - usedAreaUnrot;
+    const whitespaceRot = palletArea - usedAreaRot;
+
+    // Decision: prefer more cases, but break ties with less whitespace
+    if (countUnrotated > countRotated || 
+       (countUnrotated === countRotated && whitespaceUnrot <= whitespaceRot)) {
+        return { name: "Unrotated", placements: placementsUnrot };
     } else {
-        // Use unrotated
-        for (let i = 0; i < fitL; i++) {
-            for (let j = 0; j < fitW; j++) {
-                placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
-            }
-        }
-        return { name: "Unrotated", placements };
+        return { name: "Rotated", placements: placementsRot };
     }
 }
-  
+
 
 /* ---------- Calculate + Draw ---------- */
 function calculate(){
