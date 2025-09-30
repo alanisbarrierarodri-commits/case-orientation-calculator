@@ -210,6 +210,31 @@ function packLayer(pl, pw, bl, bw) {
     return placements;
 }
 
+
+function packRowBased(pl, pw, bl, bw) {
+    const placements = [];
+
+    // Strategy: fit as many as possible lengthwise, then fill leftover with rotated
+    let fullRows = Math.floor(pl / bl);
+    let leftoverL = pl - fullRows * bl;
+
+    // Fill full rows unrotated
+    for (let i = 0; i < fullRows; i++) {
+        for (let j = 0; j < Math.floor(pw / bw); j++) {
+            placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
+        }
+    }
+
+    // Fill leftover space with rotated cases
+    if (leftoverL >= bw) {
+        for (let j = 0; j < Math.floor(pw / bl); j++) {
+            placements.push({ x: fullRows * bl, y: j * bl, w: bw, h: bl, rot: 1 });
+        }
+    }
+
+    return placements;
+}
+
 function chooseBestPacking(pl, pw, bl, bw) {
     if (bl <= 0 || bw <= 0 || pl <= 0 || pw <= 0) {
         return { name: "Invalid", placements: [] };
@@ -220,7 +245,9 @@ function chooseBestPacking(pl, pw, bl, bw) {
         { name: "All Unrotated", placements: packAllUnrotated(pl, pw, bl, bw) },
         { name: "All Rotated", placements: packAllRotated(pl, pw, bl, bw) },
         { name: "Alternating Rows", placements: packAlternatingRows(pl, pw, bl, bw) },
-        { name: "Greedy Mixed", placements: packLayer(pl, pw, bl, bw) }
+        { name: "Greedy Mixed", placements: packLayer(pl, pw, bl, bw) },
+        { name: "Row-Based Mix", placements: packRowBased(pl, pw, bl, bw) }
+
     ];
 
     const palletArea = pl * pw;
