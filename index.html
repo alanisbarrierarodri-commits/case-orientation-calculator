@@ -214,21 +214,30 @@ function packLayer(pl, pw, bl, bw) {
 function packRowBased(pl, pw, bl, bw) {
     const placements = [];
 
-    // Strategy: fit as many as possible lengthwise, then fill leftover with rotated
-    let fullRows = Math.floor(pl / bl);
-    let leftoverL = pl - fullRows * bl;
+    // --- Try filling unrotated first ---
+    const fullRowsL = Math.floor(pl / bl);
+    const leftoverL = pl - fullRowsL * bl;
+    const fullColsW = Math.floor(pw / bw);
+    const leftoverW = pw - fullColsW * bw;
 
-    // Fill full rows unrotated
-    for (let i = 0; i < fullRows; i++) {
-        for (let j = 0; j < Math.floor(pw / bw); j++) {
+    // Fill all full unrotated rows
+    for (let i = 0; i < fullRowsL; i++) {
+        for (let j = 0; j < fullColsW; j++) {
             placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
         }
     }
 
-    // Fill leftover space with rotated cases
+    // --- Option A: fill leftover length with rotated cases ---
     if (leftoverL >= bw) {
         for (let j = 0; j < Math.floor(pw / bl); j++) {
-            placements.push({ x: fullRows * bl, y: j * bl, w: bw, h: bl, rot: 1 });
+            placements.push({ x: fullRowsL * bl, y: j * bl, w: bw, h: bl, rot: 1 });
+        }
+    }
+
+    // --- Option B: fill leftover width with rotated cases ---
+    if (leftoverW >= bl) {
+        for (let i = 0; i < fullRowsL; i++) {
+            placements.push({ x: i * bl, y: fullColsW * bw, w: bw, h: bl, rot: 1 });
         }
     }
 
