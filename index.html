@@ -216,15 +216,25 @@ function calculate(){
         legendContainer.style.paddingTop='5px'; legendContainer.style.borderTop='1px solid #ccc';
 
         const unrotated=document.createElement('div');
-        unrotated.style.display='flex'; unrotated.style.alignItems='center';
-        unrotated.innerHTML=`<div style="width:20px;height:20px;background:#ffc220;margin-right:5px;border:1px solid #000;"></div>
-        Case’s <strong>longest side (Length)</strong> aligned with the pallet’s <strong>longest side</strong>`;
+        unrotated.style.display='flex';
+        unrotated.style.alignItems='center';
+        unrotated.innerHTML=`
+          <div style="flex:1;"></div>
+          <div>
+            Case’s <strong>longest side (Length)</strong><br>
+            aligned with pallet’s <strong>longest side</strong>
+          </div>`;
         legendContainer.appendChild(unrotated);
-
+        
         const rotated=document.createElement('div');
-        rotated.style.display='flex'; rotated.style.alignItems='center';
-        rotated.innerHTML=`<div style="width:20px;height:20px;background:#0071ce;margin-right:5px;border:1px solid #000;"></div>
-        Case’s <strong>shortest side (Width)</strong> aligned with the pallet’s <strong>longest side</strong>`;
+        rotated.style.display='flex';
+        rotated.style.alignItems='center';
+        rotated.innerHTML=`
+          <div style="width:20px;height:20px;background:#0071ce;margin-right:8px;border:1px solid #000;"></div>
+          <div>
+            Case’s <strong>shortest side (Width)</strong><br>
+            aligned with pallet’s <strong>longest side</strong>
+          </div>`;
         legendContainer.appendChild(rotated);
 
         card.appendChild(legendContainer);
