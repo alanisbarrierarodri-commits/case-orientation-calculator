@@ -149,91 +149,148 @@ function packSimple(pl, pw, bl, bw) {
     }
 }
 
+function packMixed(pl, pw, bl, bw) {
+    const placements = [];
+
+    // Start with unrotated
+    const fitL = Math.floor(pl / bl);
+    const fitW = Math.floor(pw / bw);
+    const usedL = fitL * bl;
+    const usedW = fitW * bw;
+    for (let i = 0; i < fitL; i++) {
+        for (let j = 0; j < fitW; j++) {
+            placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
+        }
+    }
+
+    // Try to fill leftover strip along pallet length with rotated
+    const remainingL = pl - usedL;
+    if (remainingL >= bw) {
+        const fitLRot = Math.floor(remainingL / bw);
+        const fitWRot = Math.floor(pw / bl);
+        for (let i = 0; i < fitLRot; i++) {
+            for (let j = 0; j < fitWRot; j++) {
+                placements.push({ x: usedL + i * bw, y: j * bl, w: bw, h: bl, rot: 1 });
+            }
+        }
+    }
+
+    return { name: "Mixed", placements };
+}
+
 
 /* ---------- Calculate + Draw ---------- */
-function calculate(){
+function calculate() {
     lastResults = [];
     const bl = parseFloat(document.getElementById('length').value);
     const bw = parseFloat(document.getElementById('width').value);
     const bh = parseFloat(document.getElementById('height').value);
-  
+
     const palletL = 48, palletW = 40;
-    const best = packSimple(palletL,palletW,bl,bw);
-    best.cases = best.placements.length;
-  
-    const slots = [...document.querySelectorAll('#slot-options input:checked')].map(e=>parseInt(e.value));
+
+    const slots = [...document.querySelectorAll('#slot-options input:checked')]
+        .map(e => parseInt(e.value));
     const results = document.getElementById('results');
     results.innerHTML = "";
 
-    if([bl,bw,bh].some(v=>isNaN(v)||v<=0)){
-        results.innerHTML="<div class='result-card'>Please enter valid positive numbers.</div>";
+    if ([bl, bw, bh].some(v => isNaN(v) || v <= 0)) {
+        results.innerHTML = "<div class='result-card'>Please enter valid positive numbers.</div>";
         showPage(4); return;
     }
-    if(slots.length===0){
-        results.innerHTML="<div class='result-card'>Please select at least one slot size.</div>";
+    if (slots.length === 0) {
+        results.innerHTML = "<div class='result-card'>Please select at least one slot size.</div>";
         showPage(4); return;
     }
 
-    slots.forEach(slot=>{
-        const hi = Math.floor(slot/bh);
-        if(hi<=0){
-            results.innerHTML+=`<div class='result-card'><div class="result-header">Slot Size: ${slot}"</div><div>No layers fit (too tall).</div></div>`;
+    // --- Try all strategies ---
+    const strategies = [
+        { name: "Simple", ...packSimple(palletL, palletW, bl, bw) },
+        { name: "Mixed", ...packMixed(palletL, palletW, bl, bw) }
+    ];
+
+    // --- Evaluate whitespace and cases ---
+    strategies.forEach(s => {
+        const used = s.placements.reduce((sum, p) => sum + p.w * p.h, 0);
+        s.whitespace = palletL * palletW - used;
+        s.cases = s.placements.length;
+    });
+
+    // --- Pick strategy with least whitespace ---
+    strategies.sort((a, b) => a.whitespace - b.whitespace);
+    const best = strategies[0];
+
+    // --- Render results for each slot size ---
+    slots.forEach(slot => {
+        const hi = Math.floor(slot / bh);
+        if (hi <= 0) {
+            results.innerHTML += `<div class='result-card'>
+              <div class="result-header">Slot Size: ${slot}"</div>
+              <div>No layers fit (too tall).</div></div>`;
             return;
         }
 
-        const ti = best.cases, total = ti*hi;
-        lastResults.push({slotHeight:slot,TI:ti,HI:hi,Total:total,Strategy:best.name});
+        const ti = best.cases, total = ti * hi;
+        lastResults.push({ slotHeight: slot, TI: ti, HI: hi, Total: total, Strategy: best.name });
 
         const card = document.createElement('div');
-        card.className="result-card";
-        card.innerHTML=`<div class="result-header">Slot Size: ${slot}"</div>
+        card.className = "result-card";
+        card.innerHTML = `<div class="result-header">Slot Size: ${slot}"</div>
         <div class="result-metrics">
             <span>TI (per layer): <span class="highlight">${ti}</span></span>
             <span>HI (layers): <span class="highlight">${hi}</span></span>
             <span>Total: <span class="highlight">${total}</span></span>
+            <span>Strategy: <span class="highlight">${best.name}</span></span>
         </div>`;
 
-        const canvas=document.createElement('canvas');
-        canvas.width=400; canvas.height=360;
+        const canvas = document.createElement('canvas');
+        canvas.width = 400; canvas.height = 360;
         card.appendChild(canvas);
-        const ctx=canvas.getContext('2d');
-        const scaleX = canvas.width/palletL;
-        const scaleY = (canvas.height-40)/palletW;
-        ctx.strokeStyle="#000"; ctx.lineWidth=2;
-        ctx.strokeRect(0,0,palletL*scaleX,palletW*scaleY);
+        const ctx = canvas.getContext('2d');
+        const scaleX = canvas.width / palletL;
+        const scaleY = (canvas.height - 40) / palletW;
 
-        best.placements.forEach(p=>{
-            ctx.fillStyle=p.rot?'#0071ce':'#ffc220';
-            ctx.fillRect(p.x*scaleX,p.y*scaleY,p.w*scaleX,p.h*scaleY);
-            ctx.strokeStyle="#000";
-            ctx.strokeRect(p.x*scaleX,p.y*scaleY,p.w*scaleX,p.h*scaleY);
+        // Draw pallet border
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+        ctx.strokeRect(0, 0, palletL * scaleX, palletW * scaleY);
+
+        // Draw cases
+        best.placements.forEach(p => {
+            ctx.fillStyle = p.rot ? '#0071ce' : '#ffc220';
+            ctx.fillRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
+            ctx.strokeStyle = "#000";
+            ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
         });
 
-        ctx.fillStyle="#000"; ctx.font="14px Arial";
-        const bottomText="Pallet's Longest Side";
+        // Label bottom
+        ctx.fillStyle = "#000"; ctx.font = "14px Arial";
+        const bottomText = "Pallet's Longest Side";
         const bottomWidth = ctx.measureText(bottomText).width;
-        ctx.fillText(bottomText,(canvas.width-bottomWidth)/2,canvas.height-5);
+        ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
 
-        const legendContainer=document.createElement('div');
-        legendContainer.style.marginTop='10px'; legendContainer.style.display='flex';
-        legendContainer.style.gap='20px'; legendContainer.style.alignItems='center';
-        legendContainer.style.paddingTop='5px'; legendContainer.style.borderTop='1px solid #ccc';
+        // Legend
+        const legendContainer = document.createElement('div');
+        legendContainer.style.marginTop = '10px';
+        legendContainer.style.display = 'flex';
+        legendContainer.style.gap = '20px';
+        legendContainer.style.alignItems = 'center';
+        legendContainer.style.paddingTop = '5px';
+        legendContainer.style.borderTop = '1px solid #ccc';
 
-        const unrotated=document.createElement('div');
-        unrotated.style.display='flex';
-        unrotated.style.alignItems='center';
-        unrotated.innerHTML=`
+        const unrotated = document.createElement('div');
+        unrotated.style.display = 'flex';
+        unrotated.style.alignItems = 'center';
+        unrotated.innerHTML = `
           <div style="width:20px;height:20px;background:#ffc220;margin-right:8px;border:1px solid #000;"></div>
           <div>
             Case’s <strong>longest side (Length)</strong><br>
             aligned with pallet’s <strong>longest side</strong>
           </div>`;
         legendContainer.appendChild(unrotated);
-        
-        const rotated=document.createElement('div');
-        rotated.style.display='flex';
-        rotated.style.alignItems='center';
-        rotated.innerHTML=`
+
+        const rotated = document.createElement('div');
+        rotated.style.display = 'flex';
+        rotated.style.alignItems = 'center';
+        rotated.innerHTML = `
           <div style="width:20px;height:20px;background:#0071ce;margin-right:8px;border:1px solid #000;"></div>
           <div>
             Case’s <strong>shortest side (Width)</strong><br>
@@ -247,6 +304,7 @@ function calculate(){
 
     showPage(4);
 }
+
 
 /* ---------- Send To QA ---------- */
 async function sendToQA(){
