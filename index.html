@@ -114,29 +114,26 @@ function prevPage(){if(currentPage>1)showPage(currentPage-1);}
 
 /* ---------- Packing Strategies with boundary checks ---------- */
 function packSimple(pl, pw, bl, bw) {
-  // ✅ Helper: count how many cases fit along a side (with 85% tolerance)
-  const tolerance = 0.70;
-function fitCount(palletSide, caseSide) {
-  const exact = palletSide / caseSide;
-  const whole = Math.floor(exact);
-  const decimal = exact - whole;
-  return decimal >= tolerance ? whole + 1 : whole;
-}
+  const tolerance = 0.85; // <- use realistic fit tolerance
 
+  // Reduce usable pallet dimensions slightly for realistic fitting
+  const effL = pl * tolerance;
+  const effW = pw * tolerance;
 
-
-  // Option 1: case long side along pallet long side
-  const opt1_L = fitCount(pl, bl);
-  const opt1_W = fitCount(pw, bw);
+  // Orientation 1: Longest side along longest pallet side
+  const opt1_L = Math.floor(effL / bl);
+  const opt1_W = Math.floor(effW / bw);
   const opt1_T = opt1_L * opt1_W;
+  const opt1_unused = (pl - opt1_L * bl) * (pw - opt1_W * bw);
 
-  // Option 2: case short side along pallet long side (rotated)
-  const opt2_L = fitCount(pl, bw);
-  const opt2_W = fitCount(pw, bl);
+  // Orientation 2: Shortest side along longest pallet side
+  const opt2_L = Math.floor(effL / bw);
+  const opt2_W = Math.floor(effW / bl);
   const opt2_T = opt2_L * opt2_W;
+  const opt2_unused = (pl - opt2_L * bw) * (pw - opt2_W * bl);
 
-  // Pick whichever fits more full cases
-  const useRotation = opt2_T >= opt1_T;
+  // Prefer whichever fits more cases; if tied, prefer less unused space
+  const useRotation = opt2_T > opt1_T || (opt2_T === opt1_T && opt2_unused < opt1_unused);
 
   const placements = [];
   if (!useRotation) {
@@ -155,6 +152,7 @@ function fitCount(palletSide, caseSide) {
 
   return { placements, cases: placements.length };
 }
+
 
 function packMixed(pl, pw, bl, bw) {
   const placements = [];
