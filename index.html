@@ -114,49 +114,37 @@ function prevPage(){if(currentPage>1)showPage(currentPage-1);}
 
 /* ---------- Packing Strategies with boundary checks ---------- */
 function packSimple(pl, pw, bl, bw) {
-    const PA_L = Math.floor(pl / bl);
-  const PA_W = Math.floor(pw / bw);
-  const PA_T = PA_L * PA_W;
+  // Option 1: Length along pallet length
+  const opt1_L = Math.floor(pl / bl);
+  const opt1_W = Math.floor(pw / bw);
+  const opt1_T = opt1_L * opt1_W;
 
-  const usedLength = PA_L * bl;
-  const remainingLength = pl - usedLength;
+  // Option 2: Width along pallet length (rotated)
+  const opt2_L = Math.floor(pl / bw);
+  const opt2_W = Math.floor(pw / bl);
+  const opt2_T = opt2_L * opt2_W;
 
-  // Rotated fill: width along pallet length
-  const Rot_L = Math.floor(remainingLength / bw);
-  const Rot_W = Math.floor(pw / bl);
-  const Rot_T = Rot_L * Rot_W;
+  let useRotation = false;
+  if (opt2_T > opt1_T) useRotation = true;
 
-  const total = PA_T + Rot_T;
-
-  // Build placements
   const placements = [];
-
-  // Primary placements
-  for (let i = 0; i < PA_L; i++) {
-    for (let j = 0; j < PA_W; j++) {
-      placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
+  if (!useRotation) {
+    for (let i = 0; i < opt1_L; i++) {
+      for (let j = 0; j < opt1_W; j++) {
+        placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
+      }
+    }
+  } else {
+    for (let i = 0; i < opt2_L; i++) {
+      for (let j = 0; j < opt2_W; j++) {
+        placements.push({ x: i * bw, y: j * bl, w: bw, h: bl, rot: 1 });
+      }
     }
   }
 
-  if (Rot_L <= 0 || Rot_W <= 0) {
   return { placements, cases: placements.length };
 }
 
-  // Rotated placements
-  for (let i = 0; i < Rot_L; i++) {
-    for (let j = 0; j < Rot_W; j++) {
-      placements.push({
-        x: usedLength + i * bw,
-        y: j * bl,
-        w: bw,
-        h: bl,
-        rot: 1
-      });
-    }
-  }
-
-  return {placements, cases: total };
-}
 
 function packMixed(pl, pw, bl, bw) {
     const placements = [];
