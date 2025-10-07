@@ -114,18 +114,26 @@ function prevPage(){if(currentPage>1)showPage(currentPage-1);}
 
 /* ---------- Packing Strategies with boundary checks ---------- */
 function packSimple(pl, pw, bl, bw) {
-  // Option 1: Length along pallet length
-  const opt1_L = Math.ceil(pl / bl);
-  const opt1_W = Math.ceil(pw / bw);
+  // ✅ Helper: count how many cases fit along a side (with 85% tolerance)
+  function fitCount(palletSide, caseSide) {
+    const exact = palletSide / caseSide;
+    const whole = Math.floor(exact);
+    const decimal = exact - whole;
+    return decimal >= 0.85 ? whole + 1 : whole;
+  }
+
+  // Option 1: case long side along pallet long side
+  const opt1_L = fitCount(pl, bl);
+  const opt1_W = fitCount(pw, bw);
   const opt1_T = opt1_L * opt1_W;
 
-  // Option 2: Width along pallet length (rotated)
-  const opt2_L = Math.ceil(pl / bw);
-  const opt2_W = Math.ceil(pw / bl);
+  // Option 2: case short side along pallet long side (rotated)
+  const opt2_L = fitCount(pl, bw);
+  const opt2_W = fitCount(pw, bl);
   const opt2_T = opt2_L * opt2_W;
 
-  let useRotation = false;
-  if (opt2_T > opt1_T) useRotation = true;
+  // Pick whichever fits more full cases
+  const useRotation = opt2_T > opt1_T;
 
   const placements = [];
   if (!useRotation) {
@@ -144,7 +152,6 @@ function packSimple(pl, pw, bl, bw) {
 
   return { placements, cases: placements.length };
 }
-
 
 function packMixed(pl, pw, bl, bw) {
   const placements = [];
