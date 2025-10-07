@@ -114,11 +114,11 @@ function prevPage(){if(currentPage>1)showPage(currentPage-1);}
 
 /* ---------- Packing Strategies with boundary checks ---------- */
 function packSimple(pl, pw, bl, bw) {
-  const tolerance = 0.15; // <- use realistic fit tolerance
+ // const tolerance = 0.15; // <- use realistic fit tolerance
 
   // Reduce usable pallet dimensions slightly for realistic fitting
-  const effL = pl * tolerance;
-  const effW = pw * tolerance;
+   const effL = pl // * tolerance;
+  const effW = pw //* tolerance;
 
   // Orientation 1: Longest side along longest pallet side
   const opt1_L = Math.floor(effL / bl);
