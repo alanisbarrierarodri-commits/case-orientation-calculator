@@ -114,39 +114,48 @@ function prevPage(){if(currentPage>1)showPage(currentPage-1);}
 
 /* ---------- Packing Strategies with boundary checks ---------- */
 function packSimple(pl, pw, bl, bw) {
-    const placementsUnrot = [];
-    const fitL = Math.floor(pl / bl);
-    const fitW = Math.floor(pw / bw);
-    const countUnrotated = fitL * fitW;
-    for (let i = 0; i < fitL; i++) {
-        for (let j = 0; j < fitW; j++) {
-            placementsUnrot.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
-        }
-    }
-    const usedAreaUnrot = countUnrotated * bl * bw;
+    const PA_L = Math.floor(pl / bl);
+  const PA_W = Math.floor(pw / bw);
+  const PA_T = PA_L * PA_W;
 
-    const placementsRot = [];
-    const fitLRot = Math.floor(pl / bw);
-    const fitWRot = Math.floor(pw / bl);
-    const countRotated = fitLRot * fitWRot;
-    for (let i = 0; i < fitLRot; i++) {
-        for (let j = 0; j < fitWRot; j++) {
-            placementsRot.push({ x: i * bw, y: j * bl, w: bw, h: bl, rot: 1 });
-        }
-    }
-    const usedAreaRot = countRotated * bw * bl;
+  const usedLength = PA_L * bl;
+  const remainingLength = pl - usedLength;
 
-    const palletArea = pl * pw;
-    const whitespaceUnrot = palletArea - usedAreaUnrot;
-    const whitespaceRot = palletArea - usedAreaRot;
+  // Rotated fill: width along pallet length
+  const Rot_L = Math.floor(remainingLength / bw);
+  const Rot_W = Math.floor(pw / bl);
+  const Rot_T = Rot_L * Rot_W;
 
-    // Decision: prefer more cases, but break ties with less whitespace
-    if (countUnrotated > countRotated || 
-       (countUnrotated === countRotated && whitespaceUnrot <= whitespaceRot)) {
-        return { name: "Unrotated", placements: placementsUnrot };
-    } else {
-        return { name: "Rotated", placements: placementsRot };
+  const total = PA_T + Rot_T;
+
+  // Build placements
+  const placements = [];
+
+  // Primary placements
+  for (let i = 0; i < PA_L; i++) {
+    for (let j = 0; j < PA_W; j++) {
+      placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
     }
+  }
+
+  if (Rot_L <= 0 || Rot_W <= 0) {
+  return { placements, cases: placements.length };
+}
+
+  // Rotated placements
+  for (let i = 0; i < Rot_L; i++) {
+    for (let j = 0; j < Rot_W; j++) {
+      placements.push({
+        x: usedLength + i * bw,
+        y: j * bl,
+        w: bw,
+        h: bl,
+        rot: 1
+      });
+    }
+  }
+
+  return {placements, cases: total };
 }
 
 function packMixed(pl, pw, bl, bw) {
@@ -202,22 +211,7 @@ function calculate() {
         showPage(4); return;
     }
 
-    // --- Try all strategies ---
-    const strategies = [
-        { name: "Simple", ...packSimple(palletL, palletW, bl, bw) },
-        { name: "Mixed", ...packMixed(palletL, palletW, bl, bw) }
-    ];
-
-    // --- Evaluate whitespace and cases ---
-    strategies.forEach(s => {
-        const used = s.placements.reduce((sum, p) => sum + p.w * p.h, 0);
-        s.whitespace = palletL * palletW - used;
-        s.cases = s.placements.length;
-    });
-
-    // --- Pick strategy with least whitespace ---
-    strategies.sort((a, b) => a.whitespace - b.whitespace);
-    const best = strategies[0];
+    const best = { ...packSimple(palletL, palletW, bl, bw) };
 
     // --- Render results for each slot size ---
     slots.forEach(slot => {
@@ -239,7 +233,6 @@ function calculate() {
             <span>TI (per layer): <span class="highlight">${ti}</span></span>
             <span>HI (layers): <span class="highlight">${hi}</span></span>
             <span>Total: <span class="highlight">${total}</span></span>
-            <span>Strategy: <span class="highlight">${best.name}</span></span>
         </div>`;
 
         const canvas = document.createElement('canvas');
