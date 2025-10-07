@@ -147,33 +147,44 @@ function packSimple(pl, pw, bl, bw) {
 
 
 function packMixed(pl, pw, bl, bw) {
-    const placements = [];
+  const placements = [];
+  let y = 0;
+  let totalCases = 0;
+  let rowIndex = 0;
 
-    // Start with unrotated
-    const fitL = Math.floor(pl / bl);
-    const fitW = Math.floor(pw / bw);
-    const usedL = fitL * bl;
-    const usedW = fitW * bw;
+  // Alternate rows between unrotated and rotated orientation
+  while (true) {
+    let rowHeight, rowWidthUsed = 0;
+    const isRotated = rowIndex % 2 === 1;
+
+    const caseL = isRotated ? bw : bl;
+    const caseW = isRotated ? bl : bw;
+
+    // Stop if next row would exceed pallet height
+    if (y + caseW > pw) break;
+
+    const fitL = Math.floor(pl / caseL);
+    if (fitL <= 0) break;
+
     for (let i = 0; i < fitL; i++) {
-        for (let j = 0; j < fitW; j++) {
-            placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
-        }
+      placements.push({
+        x: i * caseL,
+        y: y,
+        w: caseL,
+        h: caseW,
+        rot: isRotated ? 1 : 0
+      });
+      totalCases++;
     }
 
-    // Try to fill leftover strip along pallet length with rotated
-    const remainingL = pl - usedL;
-    if (remainingL >= bw) {
-        const fitLRot = Math.floor(remainingL / bw);
-        const fitWRot = Math.floor(pw / bl);
-        for (let i = 0; i < fitLRot; i++) {
-            for (let j = 0; j < fitWRot; j++) {
-                placements.push({ x: usedL + i * bw, y: j * bl, w: bw, h: bl, rot: 1 });
-            }
-        }
-    }
+    rowHeight = caseW;
+    y += rowHeight;
+    rowIndex++;
+  }
 
-    return { name: "Mixed", placements };
+  return { name: "True Mixed", placements, cases: totalCases };
 }
+
 
 
 /* ---------- Calculate + Draw ---------- */
@@ -199,7 +210,16 @@ function calculate() {
         showPage(4); return;
     }
 
-    const best = { ...packSimple(palletL, palletW, bl, bw) };
+    // --- Compare multiple packing strategies ---
+    const strategies = [
+      { name: "Simple", ...packSimple(palletL, palletW, bl, bw) },
+      { name: "True Mixed", ...packMixed(palletL, palletW, bl, bw) }
+    ];
+    
+    // --- Choose best: most cases, then least whitespace (if you want to add that later) ---
+    strategies.sort((a, b) => b.cases - a.cases);
+    const best = strategies[0];
+
 
     // --- Render results for each slot size ---
     slots.forEach(slot => {
