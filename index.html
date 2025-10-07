@@ -153,15 +153,12 @@ function packMixed(pl, pw, bl, bw) {
   let rowIndex = 0;
 
   // Alternate rows between unrotated and rotated orientation
-  while (true) {
-    let rowHeight, rowWidthUsed = 0;
+  while (y < pw - Math.min(bw, bl) / 2) {
     const isRotated = rowIndex % 2 === 1;
-
     const caseL = isRotated ? bw : bl;
     const caseW = isRotated ? bl : bw;
 
-    // Stop if next row would exceed pallet height
-    if (y + caseW > pw) break;
+    if (y + caseW > pw) break; // stops if case would go past edge
 
     const fitL = Math.floor(pl / caseL);
     if (fitL <= 0) break;
@@ -177,15 +174,12 @@ function packMixed(pl, pw, bl, bw) {
       totalCases++;
     }
 
-    rowHeight = caseW;
-    y += rowHeight;
+    y += caseW;
     rowIndex++;
   }
 
   return { name: "True Mixed", placements, cases: totalCases };
 }
-
-
 
 /* ---------- Calculate + Draw ---------- */
 function calculate() {
