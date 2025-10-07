@@ -223,85 +223,100 @@ function calculate() {
 
     // --- Render results for each slot size ---
     slots.forEach(slot => {
-        const hi = Math.floor(slot / bh);
-        if (hi <= 0) {
-            results.innerHTML += `<div class='result-card'>
-              <div class="result-header">Slot Size: ${slot}"</div>
-              <div>No layers fit (too tall).</div></div>`;
-            return;
-        }
-
-        const ti = best.cases, total = ti * hi;
-        lastResults.push({ slotHeight: slot, TI: ti, HI: hi, Total: total, Strategy: best.name });
-
-        const card = document.createElement('div');
-        card.className = "result-card";
-        card.innerHTML = `<div class="result-header">Slot Size: ${slot}"</div>
-        <div class="result-metrics">
-            <span>TI (per layer): <span class="highlight">${ti}</span></span>
-            <span>HI (layers): <span class="highlight">${hi}</span></span>
-            <span>Total: <span class="highlight">${total}</span></span>
-        </div>`;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = 400; canvas.height = 360;
-        card.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
-        const scaleX = canvas.width / palletL;
-        const scaleY = (canvas.height - 40) / palletW;
-
-        // Draw pallet border
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
-        ctx.strokeRect(0, 0, palletL * scaleX, palletW * scaleY);
-
-        // Draw cases
-        best.placements.forEach(p => {
-            ctx.fillStyle = p.rot ? '#0071ce' : '#ffc220';
-            ctx.fillRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
-            ctx.strokeStyle = "#000";
-            ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
-        });
-
-        // Label bottom
-        ctx.fillStyle = "#000"; ctx.font = "14px Arial";
-        const bottomText = "Pallet's Longest Side";
-        const bottomWidth = ctx.measureText(bottomText).width;
-        ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
-
-        // Legend
-        const legendContainer = document.createElement('div');
-        legendContainer.style.marginTop = '10px';
-        legendContainer.style.display = 'flex';
-        legendContainer.style.gap = '20px';
-        legendContainer.style.alignItems = 'center';
-        legendContainer.style.paddingTop = '5px';
-        legendContainer.style.borderTop = '1px solid #ccc';
-
-        const unrotated = document.createElement('div');
-        unrotated.style.display = 'flex';
-        unrotated.style.alignItems = 'center';
-        unrotated.innerHTML = `
-          <div style="width:20px;height:20px;background:#ffc220;margin-right:8px;border:1px solid #000;"></div>
-          <div>
-            Case’s <strong>longest side (Length)</strong><br>
-            aligned with pallet’s <strong>longest side</strong>
-          </div>`;
-        legendContainer.appendChild(unrotated);
-
-        const rotated = document.createElement('div');
-        rotated.style.display = 'flex';
-        rotated.style.alignItems = 'center';
-        rotated.innerHTML = `
-          <div style="width:20px;height:20px;background:#0071ce;margin-right:8px;border:1px solid #000;"></div>
-          <div>
-            Case’s <strong>shortest side (Width)</strong><br>
-            aligned with pallet’s <strong>longest side</strong>
-          </div>`;
-        legendContainer.appendChild(rotated);
-
-        card.appendChild(legendContainer);
-        results.appendChild(card);
+    const hi = Math.floor(slot / bh);
+    if (hi <= 0) {
+        results.innerHTML += `<div class='result-card'>
+          <div class="result-header">Slot Size: ${slot}"</div>
+          <div>No layers fit (too tall).</div></div>`;
+        return;
+    }
+  
+    const ti = best.cases, total = ti * hi;
+    lastResults.push({ slotHeight: slot, TI: ti, HI: hi, Total: total, Strategy: best.name });
+  
+    const card = document.createElement('div');
+    card.className = "result-card";
+    card.innerHTML = `<div class="result-header">Slot Size: ${slot}"</div>
+    <div class="result-metrics">
+        <span>TI (per layer): <span class="highlight">${ti}</span></span>
+        <span>HI (layers): <span class="highlight">${hi}</span></span>
+        <span>Total: <span class="highlight">${total}</span></span>
+    </div>`;
+  
+    // Canvas for pallet view
+    const canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 360;
+    card.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+  
+    const palletL = 48, palletW = 40;
+  
+    // Determine actual used pallet area (no confusing empty space)
+    const usedL = Math.max(...best.placements.map(p => p.x + p.w), 0);
+    const usedW = Math.max(...best.placements.map(p => p.y + p.h), 0);
+  
+    // Scaling based on full pallet, but draw only used area
+    const scaleX = canvas.width / palletL;
+    const scaleY = (canvas.height - 40) / palletW;
+    const visibleHeight = usedW * scaleY;
+  
+    // Clear canvas and draw adjusted pallet outline
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, usedL * scaleX, visibleHeight);
+  
+    // Draw each case (no misleading gray area at end)
+    best.placements.forEach(p => {
+        ctx.fillStyle = p.rot ? '#0071ce' : '#ffc220';
+        ctx.fillRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
     });
+  
+    // Label bottom (always centered for full pallet)
+    ctx.fillStyle = "#000";
+    ctx.font = "14px Arial";
+    const bottomText = "Pallet's Longest Side";
+    const bottomWidth = ctx.measureText(bottomText).width;
+    ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
+  
+    // Legend (unchanged)
+    const legendContainer = document.createElement('div');
+    legendContainer.style.marginTop = '10px';
+    legendContainer.style.display = 'flex';
+    legendContainer.style.gap = '20px';
+    legendContainer.style.alignItems = 'center';
+    legendContainer.style.paddingTop = '5px';
+    legendContainer.style.borderTop = '1px solid #ccc';
+  
+    const unrotated = document.createElement('div');
+    unrotated.style.display = 'flex';
+    unrotated.style.alignItems = 'center';
+    unrotated.innerHTML = `
+      <div style="width:20px;height:20px;background:#ffc220;margin-right:8px;border:1px solid #000;"></div>
+      <div>
+        Case’s <strong>longest side (Length)</strong><br>
+        aligned with pallet’s <strong>longest side</strong>
+      </div>`;
+    legendContainer.appendChild(unrotated);
+  
+    const rotated = document.createElement('div');
+    rotated.style.display = 'flex';
+    rotated.style.alignItems = 'center';
+    rotated.innerHTML = `
+      <div style="width:20px;height:20px;background:#0071ce;margin-right:8px;border:1px solid #000;"></div>
+      <div>
+        Case’s <strong>shortest side (Width)</strong><br>
+        aligned with pallet’s <strong>longest side</strong>
+      </div>`;
+    legendContainer.appendChild(rotated);
+  
+    card.appendChild(legendContainer);
+    results.appendChild(card);
+  });
+
 
     showPage(4);
 }
