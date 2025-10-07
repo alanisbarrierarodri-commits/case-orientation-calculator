@@ -153,12 +153,13 @@ function packMixed(pl, pw, bl, bw) {
   let rowIndex = 0;
 
   // Alternate rows between unrotated and rotated orientation
-  while (y < pw - Math.min(bw, bl) / 2) {
+  while (y + Math.min(bw, bl) <= pw + 0.1) { // slight tolerance for rounding
     const isRotated = rowIndex % 2 === 1;
     const caseL = isRotated ? bw : bl;
     const caseW = isRotated ? bl : bw;
 
-    if (y + caseW > pw) break; // stops if case would go past edge
+    // stop if next row exceeds pallet width
+    if (y + caseW > pw + 0.1) break;
 
     const fitL = Math.floor(pl / caseL);
     if (fitL <= 0) break;
