@@ -213,10 +213,15 @@ function calculate() {
         showPage(4); return;
     }
 
+     // --- Effective pallet dimensions with overhang (1" each side = 2" total) ---
+    const overhang = 1; // inches per side
+    const effectiveL = palletL + overhang * 2;
+    const effectiveW = palletW + overhang * 2;
+    
     // --- Compare multiple packing strategies ---
     const strategies = [
-      { name: "Simple", ...packSimple(palletL, palletW, bl, bw) },
-      { name: "True Mixed", ...packMixed(palletL, palletW, bl, bw) }
+      { name: "Simple", ...packSimple(effectiveL, effectiveW, bl, bw) },
+      { name: "True Mixed", ...packMixed(effectiveL, effectiveW, bl, bw) }
     ];
     
     // --- Choose best: most cases, then least whitespace (if you want to add that later) ---
@@ -226,13 +231,23 @@ function calculate() {
 
     // --- Render results for each slot size ---
     slots.forEach(slot => {
-    const hi = Math.floor(slot / bh);
-    if (hi <= 0) {
-        results.innerHTML += `<div class='result-card'>
-          <div class="result-header">Slot Size: ${slot}"</div>
-          <div>No layers fit (too tall).</div></div>`;
-        return;
-    }
+    const palletHeight = 6; // fixed pallet height in inches
+    const usableHeight = slot - palletHeight; // remaining height for cases
+
+    if (usableHeight <= 0) {
+    results.innerHTML += `<div class='result-card'>
+      <div class="result-header">Slot Size: ${slot}"</div>
+      <div>Slot height too small after accounting for 6" pallet.</div></div>`;
+    return;
+  }
+      
+    const hi = Math.floor(usableHeight / bh);
+  if (hi <= 0) {
+    results.innerHTML += `<div class='result-card'>
+      <div class="result-header">Slot Size: ${slot}"</div>
+      <div>No layers fit (too tall when including pallet height).</div></div>`;
+    return;
+  }
   
     const ti = best.cases, total = ti * hi;
     lastResults.push({ slotHeight: slot, TI: ti, HI: hi, Total: total, Strategy: best.name });
@@ -253,7 +268,13 @@ function calculate() {
     card.appendChild(canvas);
     const ctx = canvas.getContext('2d');
   
-    const palletL = 48, palletW = 40;
+    const palletL = 48;
+    const palletW = 40;
+    const overhang = 1; // inches per side
+    
+    // Effective pallet area for fitting
+    const effectiveL = palletL + overhang * 2;
+    const effectiveW = palletW + overhang * 2;
   
     // Determine actual used pallet area (no confusing empty space)
     const usedL = Math.max(...best.placements.map(p => p.x + p.w), 0);
