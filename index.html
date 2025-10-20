@@ -276,21 +276,15 @@ function calculate() {
     const effectiveL = palletL + overhang * 2;
     const effectiveW = palletW + overhang * 2;
   
-    // Determine actual used pallet area (no confusing empty space)
-    const usedL = Math.max(...best.placements.map(p => p.x + p.w), 0);
-    const usedW = Math.max(...best.placements.map(p => p.y + p.h), 0);
-  
-    // Scaling based on full pallet, but draw only used area
-    const scaleX = canvas.width / palletL;
-    const scaleY = (canvas.height - 40) / palletW;
-    const visibleHeight = usedW * scaleY;
-  
-    // Clear canvas and draw adjusted pallet outline
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Scale drawing to match the effective area
+    const scaleX = canvas.width / effectiveL;
+    const scaleY = (canvas.height - 40) / effectiveW;
+    
+    // Draw outer pallet area (including overhang)
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 2;
-    ctx.strokeRect(0, 0, usedL * scaleX, visibleHeight);
-  
+    ctx.strokeRect(0, 0, effectiveL * scaleX, effectiveW * scaleY);
+      
     // Draw each case (no misleading gray area at end)
     best.placements.forEach(p => {
         ctx.fillStyle = p.rot ? '#0071ce' : '#ffc220';
