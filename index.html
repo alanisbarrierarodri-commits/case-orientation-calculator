@@ -159,32 +159,37 @@ function packMixed(pl, pw, bl, bw) {
   let y = 0;
   let totalCases = 0;
 
-    // --- Try to fit unrotated rows first ---
-  const unrotatedW = bw;
-  const unrotatedRows = Math.floor(pw / unrotatedW);
-  const fitL_unrot = Math.floor(pl / bl);
-
-  for (let j = 0; j < unrotatedRows; j++) {
-    if (y + unrotatedW > pw + 0.1) break;
-    for (let i = 0; i < fitL_unrot; i++) {
-      placements.push({ x: i * bl, y: y, w: bl, h: unrotatedW, rot: 0 });
+   // --- Fill all unrotated rows first ---
+  const rows_unrot = Math.floor(pw / bw);
+  for (let j = 0; j < rows_unrot; j++) {
+    const fitL = Math.floor(pl / bl);
+    for (let i = 0; i < fitL; i++) {
+      placements.push({ x: i * bl, y: y, w: bl, h: bw, rot: 0 });
       totalCases++;
     }
-    y += unrotatedW;
+    y += bw;
   }
 
-  // --- Now try to fit rotated rows below if any space left ---
-  while (y + bl <= pw + 0.1) {
-    const fitL_rot = Math.floor(pl / bw);
-    if (fitL_rot <= 0) break;
-    for (let i = 0; i < fitL_rot; i++) {
-      placements.push({ x: i * bw, y: y, w: bw, h: bl, rot: 1 });
-      totalCases++;
+  // --- If there's leftover width, see if rotated cases fit there ---
+  const remaining = pw - y;
+  if (remaining >= bl) {
+    const rows_rot = Math.floor(remaining / bl);
+    for (let j = 0; j < rows_rot; j++) {
+      const fitL_rot = Math.floor(pl / bw);
+      for (let i = 0; i < fitL_rot; i++) {
+        placements.push({
+          x: i * bw,
+          y: y + j * bl,
+          w: bw,
+          h: bl,
+          rot: 1
+        });
+        totalCases++;
+      }
     }
-    y += bl;
   }
 
-  return { name: "Grouped Mixed", placements, cases: totalCases };
+  return { name: "True Mixed", placements, cases: totalCases };
 }
 
 /* ---------- Calculate + Draw ---------- */
