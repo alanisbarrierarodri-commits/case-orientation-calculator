@@ -281,9 +281,9 @@ function calculate() {
     const scaleY = (canvas.height - 40) / effectiveW;
     
     // Draw outer pallet area (including overhang)
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, 0, effectiveL * scaleX, effectiveW * scaleY);
+    //ctx.strokeStyle = "#000";
+    //ctx.lineWidth = 2;
+    //ctx.strokeRect(0, 0, effectiveL * scaleX, effectiveW * scaleY);
       
     // Draw each case (no misleading gray area at end)
     best.placements.forEach(p => {
