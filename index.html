@@ -156,30 +156,50 @@ function packSimple(pl, pw, bl, bw) {
 
 function packMixed(pl, pw, bl, bw) {
   const placements = [];
-  let y = 0;
   let totalCases = 0;
 
-   // --- Fill all unrotated rows first ---
-  const rows_unrot = Math.floor(pw / bw);
-  for (let j = 0; j < rows_unrot; j++) {
+   // Step 1: Fill unrotated rows
+  const fullRows = Math.floor(pw / bw);
+  let usedWidth = fullRows * bw;
+
+  for (let j = 0; j < fullRows; j++) {
     const fitL = Math.floor(pl / bl);
     for (let i = 0; i < fitL; i++) {
-      placements.push({ x: i * bl, y: y, w: bl, h: bw, rot: 0 });
+      placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
       totalCases++;
     }
-    y += bw;
   }
 
-  // --- If there's leftover width, see if rotated cases fit there ---
-  const remaining = pw - y;
-  if (remaining >= bl) {
-    const rows_rot = Math.floor(remaining / bl);
-    for (let j = 0; j < rows_rot; j++) {
-      const fitL_rot = Math.floor(pl / bw);
-      for (let i = 0; i < fitL_rot; i++) {
+  // Step 2: Fill leftover width (space along pallet width) with rotated cases if possible
+  const remainingW = pw - usedWidth;
+  if (remainingW >= bw && Math.floor(pl / bw) > 0) {
+    const fitRows = Math.floor(remainingW / bl);
+    const fitCols = Math.floor(pl / bw);
+    for (let j = 0; j < fitRows; j++) {
+      for (let i = 0; i < fitCols; i++) {
         placements.push({
           x: i * bw,
-          y: y + j * bl,
+          y: usedWidth + j * bl,
+          w: bw,
+          h: bl,
+          rot: 1
+        });
+        totalCases++;
+      }
+    }
+  }
+
+  // Step 3: Also check leftover length (space along pallet length)
+  const usedLength = Math.floor(pl / bl) * bl;
+  const remainingL = pl - usedLength;
+  if (remainingL >= bw && Math.floor(pw / bw) > 0) {
+    const fitCols = Math.floor(pw / bw);
+    const fitRows = Math.floor(remainingL / bl);
+    for (let i = 0; i < fitRows; i++) {
+      for (let j = 0; j < fitCols; j++) {
+        placements.push({
+          x: usedLength + i * bw,
+          y: j * bw,
           w: bw,
           h: bl,
           rot: 1
@@ -191,7 +211,6 @@ function packMixed(pl, pw, bl, bw) {
 
   return { name: "True Mixed", placements, cases: totalCases };
 }
-
 /* ---------- Calculate + Draw ---------- */
 function calculate() {
     lastResults = [];
