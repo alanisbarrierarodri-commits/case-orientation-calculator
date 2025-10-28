@@ -28,6 +28,21 @@
   .result-metrics span { display: inline-block; margin-right: 15px; font-weight: bold; color: #333; }
   .result-metrics .highlight { color: var(--walmart-yellow); }
   canvas { display:block; max-width:100%; height:auto; margin-top:10px; border:1px solid #ccc; border-radius:6px; background:#e0e0e0; }
+  .qa-button {
+    background: #28a745; /* green */
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin: 8px 4px 0 0;
+    font-size: 1em;
+    transition: background 0.2s;
+  }
+  .qa-button:hover {
+    background: #218838;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -84,6 +99,7 @@
     <input type="number" id="width" step="0.01">
     <button onclick="prevPage()">Previous</button>
     <button onclick="nextPage()">Next</button>
+    <button class="qa-button" onclick="sendToQA()">Send to QA</button>
   </div>
 
   <!-- PAGE 3 -->
@@ -106,7 +122,6 @@
   <!-- PAGE 4 -->
   <div class="page" id="page-4">
     <div class="results-container" id="results"></div>
-    <button id="sendQA" onclick="sendToQA()">Send to QA</button>
     <button onclick="prevPage()">Previous</button>
   </div>
 
