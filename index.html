@@ -104,17 +104,18 @@
 
   <!-- PAGE 3 -->
   <div class="page" id="page-3">
-    <label>Select Slot Sizes (choose one or more):</label>
+    <label>Select Slot Size (Provided by QA):</label>
     <div id="slot-options">
-      <label><input type="checkbox" value="30"> 30"</label><br>
-      <label><input type="checkbox" value="40"> 40"</label><br>
-      <label><input type="checkbox" value="50"> 50"</label><br>
-      <label><input type="checkbox" value="60"> 60"</label><br>
-      <label><input type="checkbox" value="71"> 71"</label><br>
-      <label><input type="checkbox" value="73"> 73"</label><br>
-      <label><input type="checkbox" value="75"> 75"</label><br>
-      <label><input type="checkbox" value="110"> 110"</label><br>
+      <label><input type="radio" name="slot-size" value="30"> 30"</label><br>
+      <label><input type="radio" name="slot-size" value="40"> 40"</label><br>
+      <label><input type="radio" name="slot-size" value="50"> 50"</label><br>
+      <label><input type="radio" name="slot-size" value="60"> 60"</label><br>
+      <label><input type="radio" name="slot-size" value="71"> 71"</label><br>
+      <label><input type="radio" name="slot-size" value="73"> 73"</label><br>
+      <label><input type="radio" name="slot-size" value="75"> 75"</label><br>
+      <label><input type="radio" name="slot-size" value="110"> 110"</label><br>
     </div>
+
     <button onclick="prevPage()">Previous</button>
     <button onclick="calculate()">Calculate</button>
   </div>
@@ -223,8 +224,8 @@ function calculate() {
 
     const palletL = 48, palletW = 40;
 
-    const slots = [...document.querySelectorAll('#slot-options input:checked')]
-        .map(e => parseInt(e.value));
+    const selected = document.querySelector('#slot-options input[name="slot-size"]:checked');
+    const slots = selected ? [parseInt(selected.value)] : [];
     const results = document.getElementById('results');
     results.innerHTML = "";
 
