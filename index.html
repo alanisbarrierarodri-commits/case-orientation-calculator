@@ -459,13 +459,13 @@
 
       if ([bl, bw, bh].some(v => isNaN(v) || v <= 0)) {
         results.innerHTML = "<div class='result-card'>Please enter valid positive numbers.</div>";
-        showPage(4);
+        showPage(currentTab, 4);
         return;
       }
 
       if (slots.length === 0) {
         results.innerHTML = "<div class='result-card'>Please select at least one slot size.</div>";
-        showPage(4);
+        showPage(currentTab, 4);
         return;
       }
 
@@ -548,7 +548,7 @@
         results.appendChild(card);
       });
 
-      showPage(4);
+      showPage(currentTab, 4);
     }
 
     // ---------- Send To QA ----------
