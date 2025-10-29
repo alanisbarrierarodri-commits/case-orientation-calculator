@@ -62,12 +62,52 @@
     background: #218838;
     cursor: pointer;
   }
+  .tab-container {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
+  gap: 10px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  background: #ddd;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.tab-button.active {
+  background: var(--walmart-blue);
+  color: white;
+}
+.tab-section {
+  display: none;
+}
+
+.tab-section.active {
+  display: block;
+}
+.content-wrapper {
+  background-color: white;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 </style>
 </head>
 <body>
 <header>SSTK Floor Loaded Item Prime Request App (FLIPR)</header>
-<div class="container">
+<div class="tab-container">
+  <button class="tab-button active" id="tab-unloader">Unloader</button>
+  <button class="tab-button" id="tab-qa">QA</button>
+</div>
+  
+<div class="content-wrapper">
 
+   <div class="container">
   <!-- PAGE 1 -->
   <div class="page" id="page-1" style="display:block;">
     <label for="dcNumber">DC:</label>
@@ -149,7 +189,8 @@
   </div>
 
 </div>
-
+  
+</div>
 <script>
 /* ---------- Page Navigation ---------- */
 let lastResults = [];
