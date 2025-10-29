@@ -24,7 +24,26 @@
   button:hover { background: #e6ac00; cursor: pointer; }
   .results-container { margin-top: 10px; display: flex; flex-direction: column; gap: 20px; max-height: 500px; overflow-y: auto; padding-right: 8px; }
   .result-card { border: 2px solid var(--walmart-blue); border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 15px; background: #f8fbff; }
-  .result-header { font-size: 1.1em; font-weight: bold; color: white; background: var(--walmart-blue); padding: 6px 10px; border-radius: 8px; margin-bottom: 8px; }
+  .result-header {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: white;
+    background: var(--walmart-blue);
+    padding: 6px 0;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  .result-metrics {
+    text-align: center;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+  }
+
+  .highlight {
+    font-weight: bold;
+    color: var(--walmart-blue);
+  }
   .result-metrics span { display: inline-block; margin-right: 15px; font-weight: bold; color: #333; }
   .result-metrics .highlight { color: var(--walmart-yellow); }
   canvas { display:block; max-width:100%; height:auto; margin-top:10px; border:1px solid #ccc; border-radius:6px; background:#e0e0e0; }
@@ -104,7 +123,10 @@
 
   <!-- PAGE 3 -->
   <div class="page" id="page-3">
-    <label>Select Slot Size (Provided by QA):</label>
+    <label>Desired Slot Size</label>
+    <small style="display:block; color:#555; margin-bottom:8px;">
+      Might differ from slot size selected by QA.
+    </small>
     <div id="slot-options">
       <label><input type="radio" name="slot-size" value="30"> 30"</label><br>
       <label><input type="radio" name="slot-size" value="40"> 40"</label><br>
@@ -256,35 +278,18 @@ function calculate() {
 
     // --- Render results for each slot size ---
     slots.forEach(slot => {
-    const palletHeight = 6; // fixed pallet height in inches
-    const usableHeight = slot - palletHeight; // remaining height for cases
-
-    if (usableHeight <= 0) {
-    results.innerHTML += `<div class='result-card'>
-      <div class="result-header">Slot Size: ${slot}"</div>
-      <div>Slot height too small after accounting for 6" pallet.</div></div>`;
-    return;
-  }
-      
-    const hi = Math.floor(usableHeight / bh);
-  if (hi <= 0) {
-    results.innerHTML += `<div class='result-card'>
-      <div class="result-header">Slot Size: ${slot}"</div>
-      <div>No layers fit (too tall when including pallet height).</div></div>`;
-    return;
-  }
-  
-    const ti = best.cases, total = ti * hi;
-    lastResults.push({ slotHeight: slot, TI: ti, HI: hi, Total: total, Strategy: best.name });
+        const ti = best.cases;
+        lastResults.push({ slotHeight: slot, TI: ti, Strategy: best.name });
   
     const card = document.createElement('div');
     card.className = "result-card";
-    card.innerHTML = `<div class="result-header">Slot Size: ${slot}"</div>
+    card.innerHTML = `
+    <div class="result-header">Top View</div>
     <div class="result-metrics">
-        <span>TI (per layer): <span class="highlight">${ti}</span></span>
-        <span>HI (layers): <span class="highlight">${hi}</span></span>
-        <span>Total: <span class="highlight">${total}</span></span>
-    </div>`;
+      <span>TI (per layer): <span class="highlight">${ti}</span></span>
+    </div>
+  `;
+
   
     // Canvas for pallet view
     const canvas = document.createElement('canvas');
@@ -391,5 +396,3 @@ async function sendToQA(){
 </script>
 </body>
 </html>
-
-
