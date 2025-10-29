@@ -257,7 +257,6 @@
 
           <button onclick="prevPage()">Previous</button>
           <button onclick="nextPage()">Next</button>
-          <button class="qa-button" onclick="sendToQA()">Send to QA</button>
         </div>
 
         <!-- PAGE 3 -->
@@ -280,6 +279,7 @@
 
           <button onclick="prevPage()">Previous</button>
           <button onclick="calculate()">Calculate</button>
+          <button class="qa-button" onclick="sendToQA()">Send to QA</button>
         </div>
 
         <!-- PAGE 4 -->
@@ -553,6 +553,9 @@
 
     // ---------- Send To QA ----------
     async function sendToQA() {
+      const selectedSlot = document.querySelector('#slot-options input[name="slot-size"]:checked');
+      const desiredSlotSize = selectedSlot ? selectedSlot.value : null;
+      
       const payload = {
         dcNumber: document.getElementById('dcNumber').value,
         associateName: document.getElementById('associateName').value,
@@ -561,6 +564,7 @@
         length: document.getElementById('length').value,
         width: document.getElementById('width').value,
         height: document.getElementById('height').value,
+        desiredSlotSize: desiredSlotSize
       };
 
       try {
@@ -615,7 +619,7 @@
       const card = document.createElement('div');
       card.className = "result-card";
       card.innerHTML = `
-        <div class="result-header">QA Results</div>
+        <div class="result-header">Results</div>
         <div class="result-metrics">
           <span>TI (per layer): <span class="highlight">${ti}</span></span><br>
           <span>HI (layers high): <span class="highlight">${hi}</span></span><br>
