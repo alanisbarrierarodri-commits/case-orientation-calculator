@@ -10,28 +10,30 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "No slot results provided" });
     }
 
+    if (!dcNumber || !itemNumber || !length || !width || !height) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    
     const COLUMNS = {
       DC: 3035087663484804,
+      ASSOCIATE: 8049847480045444,
+      DOCK_DOOR: 731498085568388,
       ITEM: 1275484055490436,
       HEIGHT: 3527283869175684,
       LENGTH: 8030883496546180,
       WIDTH: 712534102069124,
-      SLOT_SIZE: 5216133729439620,
-      TI: 8135964837498756,
-      HI: 817615443021700
     };
 
     const rows = slotResults.map(r => ({
       toTop: true,
       cells: [
         { columnId: COLUMNS.DC,      value: dcNumber },
+        { columnId: COLUMNS.ASSOCIATE,      value: associateName },
+        { columnId: COLUMNS.DOCK_DOOR,      value: dockDoor },
         { columnId: COLUMNS.ITEM,      value: itemNumber },
         { columnId: COLUMNS.HEIGHT,    value: height },
         { columnId: COLUMNS.LENGTH,    value: length },
         { columnId: COLUMNS.WIDTH,     value: width },
-        { columnId: COLUMNS.SLOT_SIZE, value: r.slotHeight },
-        { columnId: COLUMNS.TI,        value: r.TI },
-        { columnId: COLUMNS.HI,        value: r.HI }
       ]
     }));
 
