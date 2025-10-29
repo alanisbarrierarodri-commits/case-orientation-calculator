@@ -253,7 +253,7 @@
     // ---------- Tab Switching Logic ----------
     document.getElementById('tab-unloader').addEventListener('click', () => switchTab('unloader'));
     document.getElementById('tab-qa').addEventListener('click', () => switchTab('qa'));
-  });
+
     function switchTab(tab) {
       // Remove active state from all tabs and sections
       document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
@@ -264,11 +264,10 @@
       document.getElementById(`${tab}-section`).classList.add('active');
 
       currentTab = tab;
-
+      
       showPage(tab, currentPage[tab]);
     }
-  });
-  
+
 /* ---------- Page Navigation ---------- */
 let currentPage = { unloader: 1, qa: 1 }; // track pages per tab
 let currentTab = 'unloader';
