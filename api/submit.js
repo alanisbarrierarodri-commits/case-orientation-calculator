@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const {dcNumber, itemNumber, length, width, height, slotResults } = req.body;
+    const {dcNumber, associateName, dockDoor, itemNumber, length, width, height, slotResults } = req.body;
 
     if (!Array.isArray(slotResults) || slotResults.length === 0) {
       return res.status(400).json({ error: "No slot results provided" });
