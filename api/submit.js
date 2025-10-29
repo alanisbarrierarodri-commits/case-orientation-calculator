@@ -20,18 +20,20 @@ export default async function handler(req, res) {
       WIDTH: 712534102069124,
     };
 
-    const rows = slotResults.map(r => ({
+      const rows = [
+    {
       toTop: true,
       cells: [
-        { columnId: COLUMNS.DC,      value: dcNumber },
-        { columnId: COLUMNS.ASSOCIATE,      value: associateName },
-        { columnId: COLUMNS.DOCK_DOOR,      value: dockDoor },
-        { columnId: COLUMNS.ITEM,      value: itemNumber },
-        { columnId: COLUMNS.HEIGHT,    value: height },
-        { columnId: COLUMNS.LENGTH,    value: length },
-        { columnId: COLUMNS.WIDTH,     value: width },
+        { columnId: COLUMNS.DC, value: dcNumber },
+        { columnId: COLUMNS.ASSOCIATE, value: associateName },
+        { columnId: COLUMNS.DOCK_DOOR, value: dockDoor },
+        { columnId: COLUMNS.ITEM, value: itemNumber },
+        { columnId: COLUMNS.HEIGHT, value: height },
+        { columnId: COLUMNS.LENGTH, value: length },
+        { columnId: COLUMNS.WIDTH, value: width },
       ]
-    }));
+    }
+  ];
 
     const response = await fetch(
       `https://api.smartsheet.com/2.0/sheets/${process.env.SHEET_ID}/rows`,
@@ -57,5 +59,3 @@ export default async function handler(req, res) {
     });
   }
 }
-
-
