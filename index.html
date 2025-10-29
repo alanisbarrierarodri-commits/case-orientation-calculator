@@ -104,7 +104,8 @@
   <button class="tab-button active" id="tab-unloader">Unloader</button>
   <button class="tab-button" id="tab-qa">QA</button>
 </div>
-  
+
+<div id="unloader-section" class="tab-section active">
 <div class="content-wrapper">
 
    <div class="container">
@@ -191,7 +192,79 @@
 </div>
   
 </div>
+
+<!-- START OF QA SECTION -->
+<div id="qa-section" class="tab-section">
+  <div class="content-wrapper">
+    <div class="container">
+
+      <!-- QA PAGE 1 -->
+      <div class="page" id="qa-page-1" style="display:block;">
+        <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
+          <strong>Before measuring:</strong><br>
+          • Round up half inches.<br>
+          • Measure as case sits on pallet.<br>
+          • If case has <strong>upright arrows</strong>, measure upright.
+        </div>
+        <label for="qa-height">Height (inches):</label>
+        <input type="number" id="qa-height" step="0.01">
+
+        <label for="qa-length">Length (inches):</label>
+        <small>Longest side</small>
+        <input type="number" id="qa-length" step="0.01">
+
+        <label for="qa-width">Width (inches):</label>
+        <small>Shortest side</small>
+        <input type="number" id="qa-width" step="0.01">
+
+        <button onclick="qaNextPage()">Next</button>
+      </div>
+
+      <!-- QA PAGE 2 -->
+      <div class="page" id="qa-page-2">
+        <label>Select Slot Size</label>
+        <div id="qa-slot-options">
+          <label><input type="radio" name="qa-slot-size" value="30"> 30"</label><br>
+          <label><input type="radio" name="qa-slot-size" value="40"> 40"</label><br>
+          <label><input type="radio" name="qa-slot-size" value="50"> 50"</label><br>
+          <label><input type="radio" name="qa-slot-size" value="60"> 60"</label><br>
+          <label><input type="radio" name="qa-slot-size" value="71"> 71"</label><br>
+          <label><input type="radio" name="qa-slot-size" value="73"> 73"</label><br>
+          <label><input type="radio" name="qa-slot-size" value="75"> 75"</label><br>
+          <label><input type="radio" name="qa-slot-size" value="110"> 110"</label><br>
+        </div>
+
+        <button onclick="qaPrevPage()">Previous</button>
+        <button onclick="qaCalculate()">Calculate</button>
+      </div>
+
+      <!-- QA PAGE 3 -->
+      <div class="page" id="qa-page-3">
+        <div class="results-container" id="qa-results"></div>
+        <button onclick="qaPrevPage()">Previous</button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+      
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // ---------- Tab Switching Logic ----------
+    document.getElementById('tab-unloader').addEventListener('click', () => switchTab('unloader'));
+    document.getElementById('tab-qa').addEventListener('click', () => switchTab('qa'));
+  
+    function switchTab(tab) {
+      // Remove active state from all tabs and sections
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
+  
+      // Activate selected tab and its section
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      document.getElementById(`${tab}-section`).classList.add('active');
+    }
+  });
+  
 /* ---------- Page Navigation ---------- */
 let lastResults = [];
 let currentPage = 1;
