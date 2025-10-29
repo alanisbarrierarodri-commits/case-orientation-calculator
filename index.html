@@ -253,7 +253,7 @@
     // ---------- Tab Switching Logic ----------
     document.getElementById('tab-unloader').addEventListener('click', () => switchTab('unloader'));
     document.getElementById('tab-qa').addEventListener('click', () => switchTab('qa'));
-  
+  });
     function switchTab(tab) {
       // Remove active state from all tabs and sections
       document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
