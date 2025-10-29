@@ -578,6 +578,54 @@
         alert('❌ Failed to send to QA');
       }
     }
+    // ---------- QA Calculate ----------
+    function qaCalculate() {
+      const bl = parseFloat(document.getElementById('qa-length').value);
+      const bw = parseFloat(document.getElementById('qa-width').value);
+      const bh = parseFloat(document.getElementById('qa-height').value);
+
+      const selected = document.querySelector('#qa-slot-options input[name="qa-slot-size"]:checked');
+      const slot = selected ? parseInt(selected.value) : null;
+      const results = document.getElementById('qa-results');
+      results.innerHTML = "";
+
+      if ([bl, bw, bh].some(v => isNaN(v) || v <= 0)) {
+        results.innerHTML = "<div class='result-card'>Please enter valid positive numbers.</div>";
+        showPage('qa', 3);
+        return;
+      }
+
+      if (!slot) {
+        results.innerHTML = "<div class='result-card'>Please select a slot size.</div>";
+        showPage('qa', 3);
+        return;
+      }
+
+      const palletL = 48, palletW = 40;
+      const overhang = 1;
+      const effectiveL = palletL + overhang * 2;
+      const effectiveW = palletW + overhang * 2;
+
+      // Reuse packSimple to compute TI
+      const { cases: ti } = packSimple(effectiveL, effectiveW, bl, bw);
+
+      // HI = how many layers fit in slot
+      const hi = Math.floor(slot / bh);
+
+      const card = document.createElement('div');
+      card.className = "result-card";
+      card.innerHTML = `
+        <div class="result-header">QA Results</div>
+        <div class="result-metrics">
+          <span>TI (per layer): <span class="highlight">${ti}</span></span><br>
+          <span>HI (layers high): <span class="highlight">${hi}</span></span><br>
+          <span>Total Cases per Pallet: <span class="highlight">${ti * hi}</span></span>
+        </div>
+      `;
+      results.appendChild(card);
+
+      showPage('qa', 3);
+    }
   </script>
 </body>
 </html>
