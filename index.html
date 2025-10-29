@@ -262,15 +262,27 @@
       // Activate selected tab and its section
       document.getElementById(`tab-${tab}`).classList.add('active');
       document.getElementById(`${tab}-section`).classList.add('active');
+
+      currentTab = tab;
     }
   });
   
 /* ---------- Page Navigation ---------- */
-let lastResults = [];
-let currentPage = 1;
-function showPage(n){document.querySelectorAll('.page').forEach((p,i)=>p.style.display=(i+1===n)?'block':'none');currentPage=n;}
-function nextPage(){if(currentPage<4)showPage(currentPage+1);}
-function prevPage(){if(currentPage>1)showPage(currentPage-1);}
+let currentPage = { unloader: 1, qa: 1 }; // track pages per tab
+let currentTab = 'unloader';
+function showPage(tab, n){
+    const pages = document.querySelectorAll(`#${tab}-section .page`);
+    pages.forEach((p, i) => p.style.display = (i + 1 === n) ? 'block' : 'none');
+    currentPage[tab] = n;
+}
+
+// Unloader navigation
+function nextPage(){ showPage(currentTab, currentPage[currentTab] + 1); }
+function prevPage(){ showPage(currentTab, currentPage[currentTab] - 1); }
+
+// QA navigation
+function qaNextPage(){ showPage('qa', currentPage['qa'] + 1); }
+function qaPrevPage(){ showPage('qa', currentPage['qa'] - 1); }
 
 /* ---------- Packing Strategies with boundary checks ---------- */
 function packSimple(pl, pw, bl, bw) {
