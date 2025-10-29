@@ -6,10 +6,6 @@ export default async function handler(req, res) {
   try {
     const {dcNumber, associateName, dockDoor, itemNumber, length, width, height, slotResults } = req.body;
 
-    if (!Array.isArray(slotResults) || slotResults.length === 0) {
-      return res.status(400).json({ error: "No slot results provided" });
-    }
-
     if (!dcNumber || !itemNumber || !length || !width || !height) {
       return res.status(400).json({ error: "Missing required fields" });
     }
