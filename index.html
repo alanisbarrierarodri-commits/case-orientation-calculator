@@ -611,8 +611,15 @@
       const effectiveW = palletW + overhang * 2;
 
       // Reuse packSimple to compute TI
-      const { cases: ti } = packSimple(effectiveL, effectiveW, bl, bw);
+      const strategies = [
+        { name: "Simple", ...packSimple(effectiveL, effectiveW, bl, bw) },
+        { name: "True Mixed", ...packMixed(effectiveL, effectiveW, bl, bw) }
+      ];
 
+      strategies.sort((a, b) => b.cases - a.cases);
+      const best = strategies[0];
+      const ti = best.cases;
+          
       // HI = how many layers fit in slot
       const hi = Math.floor(slot / bh);
 
