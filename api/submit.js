@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const {dcNumber, associateName, dockDoor, itemNumber, length, width, height, slotResults } = req.body;
+    const {dcNumber, associateName, dockDoor, itemNumber, length, width, height, desiredSlotSize} = req.body;
 
     if (!dcNumber || !itemNumber || !length || !width || !height) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -18,6 +18,7 @@ export default async function handler(req, res) {
       HEIGHT: 3527283869175684,
       LENGTH: 8030883496546180,
       WIDTH: 712534102069124,
+      SLOT_SIZE: 5216133729439620
     };
 
       const rows = [
@@ -31,6 +32,7 @@ export default async function handler(req, res) {
         { columnId: COLUMNS.HEIGHT, value: height },
         { columnId: COLUMNS.LENGTH, value: length },
         { columnId: COLUMNS.WIDTH, value: width },
+        { columnId: COLUMNS.SLOT_SIZE, value: desiredSlotSize }
       ]
     }
   ];
