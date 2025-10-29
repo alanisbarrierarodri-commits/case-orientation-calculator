@@ -1,525 +1,589 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SSTK Floor Loaded Item Prime Request App (FLIPR)</title>
-<style>
-  :root {
-    --walmart-blue: #0071ce;
-    --walmart-yellow: #ffc220;
-    --light-gray: #f5f5f5;
-  }
-  body { font-family: Arial, sans-serif; margin: 0; background: var(--light-gray); }
-  header { background: var(--walmart-blue); color: white; padding: 15px; text-align: center; font-size: 1.4em; font-weight: bold; }
-  .container { background: white; max-width: 640px; margin: 20px auto; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
-  .page { display: none; }
-  label { font-weight: bold; display: block; margin-top: 10px; }
-  input, select { width: 100%; padding: 10px; margin: 5px 0 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; }
-  button {
-    padding: 10px 16px; margin: 8px 4px 0 0;
-    background: var(--walmart-yellow); color: black; font-weight: bold;
-    border: none; border-radius: 8px; font-size: 1em; transition: background 0.2s;
-  }
-  button:hover { background: #e6ac00; cursor: pointer; }
-  .results-container { margin-top: 10px; display: flex; flex-direction: column; gap: 20px; max-height: 500px; overflow-y: auto; padding-right: 8px; }
-  .result-card { border: 2px solid var(--walmart-blue); border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 15px; background: #f8fbff; }
-  .result-header {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: white;
-    background: var(--walmart-blue);
-    padding: 6px 0;
-    text-align: center;
-    border-radius: 8px;
-    margin-bottom: 6px;
-  }
-  .result-metrics {
-    text-align: center;
-    font-size: 1.1em;
-    margin-bottom: 8px;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSTK Floor Loaded Item Prime Request App (FLIPR)</title>
+  <style>
+    :root {
+      --walmart-blue: #0071ce;
+      --walmart-yellow: #ffc220;
+      --light-gray: #f5f5f5;
+    }
 
-  .highlight {
-    font-weight: bold;
-    color: var(--walmart-blue);
-  }
-  .result-metrics span { display: inline-block; margin-right: 15px; font-weight: bold; color: #333; }
-  .result-metrics .highlight { color: var(--walmart-yellow); }
-  canvas { display:block; max-width:100%; height:auto; margin-top:10px; border:1px solid #ccc; border-radius:6px; background:#e0e0e0; }
-  .qa-button {
-    background: #28a745; /* green */
-    color: white;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 16px;
-    margin: 8px 4px 0 0;
-    font-size: 1em;
-    transition: background 0.2s;
-  }
-  .qa-button:hover {
-    background: #218838;
-    cursor: pointer;
-  }
-  .tab-container {
-  display: flex;
-  justify-content: center;
-  margin: 15px 0;
-  gap: 10px;
-}
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: var(--light-gray);
+    }
 
-.tab-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px 8px 0 0;
-  background: #ddd;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.tab-button.active {
-  background: var(--walmart-blue);
-  color: white;
-}
-.tab-section {
-  display: none;
-}
+    header {
+      background: var(--walmart-blue);
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.4em;
+      font-weight: bold;
+    }
 
-.tab-section.active {
-  display: block;
-}
-.content-wrapper {
-  background-color: white;
-  padding: 20px;
-  margin: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-</style>
+    .container {
+      background: white;
+      max-width: 640px;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .page {
+      display: none;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+
+    button {
+      padding: 10px 16px;
+      margin: 8px 4px 0 0;
+      background: var(--walmart-yellow);
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #e6ac00;
+      cursor: pointer;
+    }
+
+    .qa-button {
+      background: #28a745;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin: 8px 4px 0 0;
+      font-size: 1em;
+      transition: background 0.2s;
+    }
+
+    .qa-button:hover {
+      background: #218838;
+      cursor: pointer;
+    }
+
+    .results-container {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .result-card {
+      border: 2px solid var(--walmart-blue);
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      padding: 15px;
+      background: #f8fbff;
+    }
+
+    .result-header {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: white;
+      background: var(--walmart-blue);
+      padding: 6px 0;
+      text-align: center;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+
+    .result-metrics {
+      text-align: center;
+      font-size: 1.1em;
+      margin-bottom: 8px;
+    }
+
+    .highlight {
+      font-weight: bold;
+      color: var(--walmart-blue);
+    }
+
+    .result-metrics span {
+      display: inline-block;
+      margin-right: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .result-metrics .highlight {
+      color: var(--walmart-yellow);
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #e0e0e0;
+    }
+
+    .tab-container {
+      display: flex;
+      justify-content: center;
+      margin: 15px 0;
+      gap: 10px;
+    }
+
+    .tab-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px 8px 0 0;
+      background: #ddd;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .tab-button.active {
+      background: var(--walmart-blue);
+      color: white;
+    }
+
+    .tab-section {
+      display: none;
+    }
+
+    .tab-section.active {
+      display: block;
+    }
+
+    .content-wrapper {
+      background-color: white;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
-<header>SSTK Floor Loaded Item Prime Request App (FLIPR)</header>
-<div class="tab-container">
-  <button class="tab-button active" id="tab-unloader">Unloader</button>
-  <button class="tab-button" id="tab-qa">QA</button>
-</div>
+  <header>SSTK Floor Loaded Item Prime Request App (FLIPR)</header>
 
-<div id="unloader-section" class="tab-section active">
-<div class="content-wrapper">
-
-   <div class="container">
-  <!-- PAGE 1 -->
-  <div class="page" id="page-1" style="display:block;">
-    <label for="dcNumber">DC:</label>
-    <select id="dcNumber">
-      <option value="7035">7035</option>
-    </select>
-
-    <label for="associateName">Associate Name:</label>
-    <input type="text" id="associateName">
-
-    <label for="dockDoor">Dock Door:</label>
-    <input type="text" id="dockDoor">
-    
-    <label for="itemNumber">Item #:</label>
-    <input type="text" id="itemNumber">
-    <div style="text-align: center; margin: 10px 0;">
-      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/item.png?raw=true"
-           alt="Item Image" style="max-width:100%; border-radius:8px;">
-    </div>
-    
-    <button onclick="nextPage()">Next</button>
-  </div>
-  
-
-  <!-- PAGE 2 -->
-  <div class="page" id="page-2">
-    <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
-      <strong>Before measuring:</strong><br>
-      • Round up half inches.<br>
-      • Measure as case sits on pallet.<br>
-      • If case has <strong>upright arrows</strong>, measure upright.
-    </div>
-    <div style="text-align: center; margin: 10px 0;">
-      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/measurement.png?raw=true"
-           alt="Measurement Guide" style="max-width:100%; border-radius:8px;">
-    </div>
-    <div style="text-align: center; margin: 10px 0;">
-      <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/upright.jpg?raw=true"
-           alt="Upright Guide" style="max-width:100%; border-radius:8px;">
-    </div>
-    <label for="height">Height (inches):</label>
-    <input type="number" id="height" step="0.01">
-    <label for="length">Length (inches):</label>
-    <small>Longest side</small>
-    <input type="number" id="length" step="0.01">
-    <label for="width">Width (inches):</label>
-    <small>Shortest side</small>
-    <input type="number" id="width" step="0.01">
-    <button onclick="prevPage()">Previous</button>
-    <button onclick="nextPage()">Next</button>
-    <button class="qa-button" onclick="sendToQA()">Send to QA</button>
+  <div class="tab-container">
+    <button class="tab-button active" id="tab-unloader">Unloader</button>
+    <button class="tab-button" id="tab-qa">QA</button>
   </div>
 
-  <!-- PAGE 3 -->
-  <div class="page" id="page-3">
-    <label>Desired Slot Size</label>
-    <small style="display:block; color:#555; margin-bottom:8px;">
-      Might differ from slot size selected by QA.
-    </small>
-    <div id="slot-options">
-      <label><input type="radio" name="slot-size" value="30"> 30"</label><br>
-      <label><input type="radio" name="slot-size" value="40"> 40"</label><br>
-      <label><input type="radio" name="slot-size" value="50"> 50"</label><br>
-      <label><input type="radio" name="slot-size" value="60"> 60"</label><br>
-      <label><input type="radio" name="slot-size" value="71"> 71"</label><br>
-      <label><input type="radio" name="slot-size" value="73"> 73"</label><br>
-      <label><input type="radio" name="slot-size" value="75"> 75"</label><br>
-      <label><input type="radio" name="slot-size" value="110"> 110"</label><br>
-    </div>
+  <!-- ========== UNLOADER SECTION ========== -->
+  <div id="unloader-section" class="tab-section active">
+    <div class="content-wrapper">
+      <div class="container">
+        <!-- PAGE 1 -->
+        <div class="page" id="page-1" style="display:block;">
+          <label for="dcNumber">DC:</label>
+          <select id="dcNumber">
+            <option value="7035">7035</option>
+          </select>
 
-    <button onclick="prevPage()">Previous</button>
-    <button onclick="calculate()">Calculate</button>
-  </div>
+          <label for="associateName">Associate Name:</label>
+          <input type="text" id="associateName">
 
-  <!-- PAGE 4 -->
-  <div class="page" id="page-4">
-    <div class="results-container" id="results"></div>
-    <button onclick="prevPage()">Previous</button>
-  </div>
+          <label for="dockDoor">Dock Door:</label>
+          <input type="text" id="dockDoor">
 
-</div>
-  
-</div>
+          <label for="itemNumber">Item #:</label>
+          <input type="text" id="itemNumber">
 
-<!-- START OF QA SECTION -->
-<div id="qa-section" class="tab-section">
-  <div class="content-wrapper">
-    <div class="container">
+          <div style="text-align: center; margin: 10px 0;">
+            <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/item.png?raw=true"
+                 alt="Item Image" style="max-width:100%; border-radius:8px;">
+          </div>
 
-      <!-- QA PAGE 1 -->
-      <div class="page" id="qa-page-1" style="display:block;">
-        <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
-          <strong>Before measuring:</strong><br>
-          • Round up half inches.<br>
-          • Measure as case sits on pallet.<br>
-          • If case has <strong>upright arrows</strong>, measure upright.
-        </div>
-        <label for="qa-height">Height (inches):</label>
-        <input type="number" id="qa-height" step="0.01">
-
-        <label for="qa-length">Length (inches):</label>
-        <small>Longest side</small>
-        <input type="number" id="qa-length" step="0.01">
-
-        <label for="qa-width">Width (inches):</label>
-        <small>Shortest side</small>
-        <input type="number" id="qa-width" step="0.01">
-
-        <button onclick="qaNextPage()">Next</button>
-      </div>
-
-      <!-- QA PAGE 2 -->
-      <div class="page" id="qa-page-2">
-        <label>Select Slot Size</label>
-        <div id="qa-slot-options">
-          <label><input type="radio" name="qa-slot-size" value="30"> 30"</label><br>
-          <label><input type="radio" name="qa-slot-size" value="40"> 40"</label><br>
-          <label><input type="radio" name="qa-slot-size" value="50"> 50"</label><br>
-          <label><input type="radio" name="qa-slot-size" value="60"> 60"</label><br>
-          <label><input type="radio" name="qa-slot-size" value="71"> 71"</label><br>
-          <label><input type="radio" name="qa-slot-size" value="73"> 73"</label><br>
-          <label><input type="radio" name="qa-slot-size" value="75"> 75"</label><br>
-          <label><input type="radio" name="qa-slot-size" value="110"> 110"</label><br>
+          <button onclick="nextPage()">Next</button>
         </div>
 
-        <button onclick="qaPrevPage()">Previous</button>
-        <button onclick="qaCalculate()">Calculate</button>
-      </div>
+        <!-- PAGE 2 -->
+        <div class="page" id="page-2">
+          <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
+            <strong>Before measuring:</strong><br>
+            • Round up half inches.<br>
+            • Measure as case sits on pallet.<br>
+            • If case has <strong>upright arrows</strong>, measure upright.
+          </div>
 
-      <!-- QA PAGE 3 -->
-      <div class="page" id="qa-page-3">
-        <div class="results-container" id="qa-results"></div>
-        <button onclick="qaPrevPage()">Previous</button>
+          <div style="text-align: center; margin: 10px 0;">
+            <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/measurement.png?raw=true"
+                 alt="Measurement Guide" style="max-width:100%; border-radius:8px;">
+          </div>
+
+          <div style="text-align: center; margin: 10px 0;">
+            <img src="https://github.com/alanisbarrierarodri-commits/case-orientation-calculator/blob/main/upright.jpg?raw=true"
+                 alt="Upright Guide" style="max-width:100%; border-radius:8px;">
+          </div>
+
+          <label for="height">Height (inches):</label>
+          <input type="number" id="height" step="0.01">
+
+          <label for="length">Length (inches):</label>
+          <small>Longest side</small>
+          <input type="number" id="length" step="0.01">
+
+          <label for="width">Width (inches):</label>
+          <small>Shortest side</small>
+          <input type="number" id="width" step="0.01">
+
+          <button onclick="prevPage()">Previous</button>
+          <button onclick="nextPage()">Next</button>
+          <button class="qa-button" onclick="sendToQA()">Send to QA</button>
+        </div>
+
+        <!-- PAGE 3 -->
+        <div class="page" id="page-3">
+          <label>Desired Slot Size</label>
+          <small style="display:block; color:#555; margin-bottom:8px;">
+            Might differ from slot size selected by QA.
+          </small>
+
+          <div id="slot-options">
+            <label><input type="radio" name="slot-size" value="30"> 30"</label><br>
+            <label><input type="radio" name="slot-size" value="40"> 40"</label><br>
+            <label><input type="radio" name="slot-size" value="50"> 50"</label><br>
+            <label><input type="radio" name="slot-size" value="60"> 60"</label><br>
+            <label><input type="radio" name="slot-size" value="71"> 71"</label><br>
+            <label><input type="radio" name="slot-size" value="73"> 73"</label><br>
+            <label><input type="radio" name="slot-size" value="75"> 75"</label><br>
+            <label><input type="radio" name="slot-size" value="110"> 110"</label><br>
+          </div>
+
+          <button onclick="prevPage()">Previous</button>
+          <button onclick="calculate()">Calculate</button>
+        </div>
+
+        <!-- PAGE 4 -->
+        <div class="page" id="page-4">
+          <div class="results-container" id="results"></div>
+          <button onclick="prevPage()">Previous</button>
+        </div>
       </div>
-      
     </div>
   </div>
-</div>
-      
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // ---------- Tab Switching Logic ----------
-    document.getElementById('tab-unloader').addEventListener('click', () => switchTab('unloader'));
-    document.getElementById('tab-qa').addEventListener('click', () => switchTab('qa'));
 
-    function switchTab(tab) {
-      // Remove active state from all tabs and sections
-      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
-  
-      // Activate selected tab and its section
-      document.getElementById(`tab-${tab}`).classList.add('active');
-      document.getElementById(`${tab}-section`).classList.add('active');
+  <!-- ========== QA SECTION ========== -->
+  <div id="qa-section" class="tab-section">
+    <div class="content-wrapper">
+      <div class="container">
+        <!-- QA PAGE 1 -->
+        <div class="page" id="qa-page-1" style="display:block;">
+          <div style="margin: 15px 0; padding: 10px; background:#fff3cd; border-left:5px solid #ffc107;">
+            <strong>Before measuring:</strong><br>
+            • Round up half inches.<br>
+            • Measure as case sits on pallet.<br>
+            • If case has <strong>upright arrows</strong>, measure upright.
+          </div>
 
-      currentTab = tab;
-      
-      showPage(tab, currentPage[tab]);
-    }
+          <label for="qa-height">Height (inches):</label>
+          <input type="number" id="qa-height" step="0.01">
 
-/* ---------- Page Navigation ---------- */
-let currentPage = { unloader: 1, qa: 1 }; // track pages per tab
-let currentTab = 'unloader';
-function showPage(tab, n){
-    const pages = document.querySelectorAll(`#${tab}-section .page`);
-    pages.forEach((p, i) => p.style.display = (i + 1 === n) ? 'block' : 'none');
-    currentPage[tab] = n;
-}
+          <label for="qa-length">Length (inches):</label>
+          <small>Longest side</small>
+          <input type="number" id="qa-length" step="0.01">
 
-// Unloader navigation
-function nextPage(){ showPage(currentTab, currentPage[currentTab] + 1); }
-function prevPage(){ showPage(currentTab, currentPage[currentTab] - 1); }
+          <label for="qa-width">Width (inches):</label>
+          <small>Shortest side</small>
+          <input type="number" id="qa-width" step="0.01">
 
-// QA navigation
-function qaNextPage(){ showPage('qa', currentPage['qa'] + 1); }
-function qaPrevPage(){ showPage('qa', currentPage['qa'] - 1); }
+          <button onclick="qaNextPage()">Next</button>
+        </div>
 
-/* ---------- Packing Strategies with boundary checks ---------- */
-function packSimple(pl, pw, bl, bw) {
- // const tolerance = 0.15; // <- use realistic fit tolerance
+        <!-- QA PAGE 2 -->
+        <div class="page" id="qa-page-2">
+          <label>Select Slot Size</label>
+          <div id="qa-slot-options">
+            <label><input type="radio" name="qa-slot-size" value="30"> 30"</label><br>
+            <label><input type="radio" name="qa-slot-size" value="40"> 40"</label><br>
+            <label><input type="radio" name="qa-slot-size" value="50"> 50"</label><br>
+            <label><input type="radio" name="qa-slot-size" value="60"> 60"</label><br>
+            <label><input type="radio" name="qa-slot-size" value="71"> 71"</label><br>
+            <label><input type="radio" name="qa-slot-size" value="73"> 73"</label><br>
+            <label><input type="radio" name="qa-slot-size" value="75"> 75"</label><br>
+            <label><input type="radio" name="qa-slot-size" value="110"> 110"</label><br>
+          </div>
 
-  // Reduce usable pallet dimensions slightly for realistic fitting
-   const effL = pl // * tolerance;
-  const effW = pw //* tolerance;
+          <button onclick="qaPrevPage()">Previous</button>
+          <button onclick="qaCalculate()">Calculate</button>
+        </div>
 
-  // Orientation 1: Longest side along longest pallet side
-  const opt1_L = Math.floor(effL / bl);
-  const opt1_W = Math.floor(effW / bw);
-  const opt1_T = opt1_L * opt1_W;
-  const opt1_unused = (pl - opt1_L * bl) * (pw - opt1_W * bw);
+        <!-- QA PAGE 3 -->
+        <div class="page" id="qa-page-3">
+          <div class="results-container" id="qa-results"></div>
+          <button onclick="qaPrevPage()">Previous</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  // Orientation 2: Shortest side along longest pallet side
-  const opt2_L = Math.floor(effL / bw);
-  const opt2_W = Math.floor(effW / bl);
-  const opt2_T = opt2_L * opt2_W;
-  const opt2_unused = (pl - opt2_L * bw) * (pw - opt2_W * bl);
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ---------- Tab Switching Logic ----------
+      document.getElementById('tab-unloader').addEventListener('click', () => switchTab('unloader'));
+      document.getElementById('tab-qa').addEventListener('click', () => switchTab('qa'));
 
-  // Prefer whichever fits more cases; if tied, prefer less unused space
-  const useRotation = opt2_T > opt1_T || (opt2_T === opt1_T && opt2_unused < opt1_unused);
-
-  const placements = [];
-  if (!useRotation) {
-    for (let i = 0; i < opt1_L; i++) {
-      for (let j = 0; j < opt1_W; j++) {
-        placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
+      function switchTab(tab) {
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(`tab-${tab}`).classList.add('active');
+        document.getElementById(`${tab}-section`).classList.add('active');
+        currentTab = tab;
+        showPage(tab, currentPage[tab]);
       }
+    });
+
+    // ---------- Page Navigation ----------
+    let currentPage = { unloader: 1, qa: 1 };
+    let currentTab = 'unloader';
+
+    function showPage(tab, n) {
+      const pages = document.querySelectorAll(`#${tab}-section .page`);
+      pages.forEach((p, i) => p.style.display = (i + 1 === n) ? 'block' : 'none');
+      currentPage[tab] = n;
     }
-  } else {
-    for (let i = 0; i < opt2_L; i++) {
-      for (let j = 0; j < opt2_W; j++) {
-        placements.push({ x: i * bw, y: j * bl, w: bw, h: bl, rot: 1 });
+
+    function nextPage() { showPage(currentTab, currentPage[currentTab] + 1); }
+    function prevPage() { showPage(currentTab, currentPage[currentTab] - 1); }
+    function qaNextPage() { showPage('qa', currentPage['qa'] + 1); }
+    function qaPrevPage() { showPage('qa', currentPage['qa'] - 1); }
+
+    // ---------- Packing Algorithms ----------
+    function packSimple(pl, pw, bl, bw) {
+      const effL = pl;
+      const effW = pw;
+
+      const opt1_L = Math.floor(effL / bl);
+      const opt1_W = Math.floor(effW / bw);
+      const opt1_T = opt1_L * opt1_W;
+      const opt1_unused = (pl - opt1_L * bl) * (pw - opt1_W * bw);
+
+      const opt2_L = Math.floor(effL / bw);
+      const opt2_W = Math.floor(effW / bl);
+      const opt2_T = opt2_L * opt2_W;
+      const opt2_unused = (pl - opt2_L * bw) * (pw - opt2_W * bl);
+
+      const useRotation = opt2_T > opt1_T || (opt2_T === opt1_T && opt2_unused < opt1_unused);
+      const placements = [];
+
+      if (!useRotation) {
+        for (let i = 0; i < opt1_L; i++) {
+          for (let j = 0; j < opt1_W; j++) {
+            placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
+          }
+        }
+      } else {
+        for (let i = 0; i < opt2_L; i++) {
+          for (let j = 0; j < opt2_W; j++) {
+            placements.push({ x: i * bw, y: j * bl, w: bw, h: bl, rot: 1 });
+          }
+        }
       }
+
+      return { placements, cases: placements.length };
     }
-  }
 
-  return { placements, cases: placements.length };
-}
+    function packMixed(pl, pw, bl, bw) {
+      const placements = [];
+      let totalCases = 0;
 
+      const fullRows = Math.floor(pw / bw);
+      const fitCols = Math.floor(pl / bl);
 
-function packMixed(pl, pw, bl, bw) {
-  const placements = [];
-  let totalCases = 0;
-
-  // Step 1: Fill unrotated rows
-  const fullRows = Math.floor(pw / bw);  // 42/13 = 3
-  const fitCols = Math.floor(pl / bl);   // 50/26 = 1
-  for (let j = 0; j < fullRows; j++) {
-    for (let i = 0; i < fitCols; i++) {
-      placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
-      totalCases++;
-    }
-  }
-  
-  const usedWidth = fullRows * bw;   // 39"
-  const usedLength = fitCols * bl;   // 26"
-
-  // Step 2: Fill REMAINING LENGTH with rotated cases
-  const remainingL = pl - usedLength;  // 24"
-  if (remainingL >= bw) {  // 24 >= 13 ✓
-    const fitColsRotated = Math.floor(usedWidth / bl);  // 39/26 = 1
-    const fitRowsRotated = Math.floor(remainingL / bw); // 24/13 = 1
-    for (let j = 0; j < fitRowsRotated; j++) {
-      for (let i = 0; i < fitColsRotated; i++) {
-        placements.push({
-          x: usedLength + j * bw,    // 26 + 0*13 = 26
-          y: i * bl,                 // 0*26 = 0  
-          w: bw, h: bl,              // 13x26 (rotated)
-          rot: 1
-        });
-        totalCases++;
+      for (let j = 0; j < fullRows; j++) {
+        for (let i = 0; i < fitCols; i++) {
+          placements.push({ x: i * bl, y: j * bw, w: bl, h: bw, rot: 0 });
+          totalCases++;
+        }
       }
+
+      const usedWidth = fullRows * bw;
+      const usedLength = fitCols * bl;
+      const remainingL = pl - usedLength;
+
+      if (remainingL >= bw) {
+        const fitColsRotated = Math.floor(usedWidth / bl);
+        const fitRowsRotated = Math.floor(remainingL / bw);
+
+        for (let j = 0; j < fitRowsRotated; j++) {
+          for (let i = 0; i < fitColsRotated; i++) {
+            placements.push({
+              x: usedLength + j * bw,
+              y: i * bl,
+              w: bw,
+              h: bl,
+              rot: 1
+            });
+            totalCases++;
+          }
+        }
+      }
+
+      return { name: "True Mixed", placements, cases: totalCases };
     }
-  }
 
-  return { name: "True Mixed", placements, cases: totalCases };
-}
-/* ---------- Calculate + Draw ---------- */
-function calculate() {
-    lastResults = [];
-    const bl = parseFloat(document.getElementById('length').value);
-    const bw = parseFloat(document.getElementById('width').value);
-    const bh = parseFloat(document.getElementById('height').value);
+    // ---------- Calculate ----------
+    function calculate() {
+      lastResults = [];
+      const bl = parseFloat(document.getElementById('length').value);
+      const bw = parseFloat(document.getElementById('width').value);
+      const bh = parseFloat(document.getElementById('height').value);
 
-    const palletL = 48, palletW = 40;
+      const palletL = 48, palletW = 40;
+      const selected = document.querySelector('#slot-options input[name="slot-size"]:checked');
+      const slots = selected ? [parseInt(selected.value)] : [];
+      const results = document.getElementById('results');
+      results.innerHTML = "";
 
-    const selected = document.querySelector('#slot-options input[name="slot-size"]:checked');
-    const slots = selected ? [parseInt(selected.value)] : [];
-    const results = document.getElementById('results');
-    results.innerHTML = "";
-
-    if ([bl, bw, bh].some(v => isNaN(v) || v <= 0)) {
+      if ([bl, bw, bh].some(v => isNaN(v) || v <= 0)) {
         results.innerHTML = "<div class='result-card'>Please enter valid positive numbers.</div>";
-        showPage(4); return;
-    }
-    if (slots.length === 0) {
+        showPage(4);
+        return;
+      }
+
+      if (slots.length === 0) {
         results.innerHTML = "<div class='result-card'>Please select at least one slot size.</div>";
-        showPage(4); return;
-    }
+        showPage(4);
+        return;
+      }
 
-     // --- Effective pallet dimensions with overhang (1" each side = 2" total) ---
-    const overhang = 1; // inches per side
-    const effectiveL = palletL + overhang * 2;
-    const effectiveW = palletW + overhang * 2;
-    
-    // --- Compare multiple packing strategies ---
-    const strategies = [
-      { name: "Simple", ...packSimple(effectiveL, effectiveW, bl, bw) },
-      { name: "True Mixed", ...packMixed(effectiveL, effectiveW, bl, bw) }
-    ];
-    
-    // --- Choose best: most cases, then least whitespace (if you want to add that later) ---
-    strategies.sort((a, b) => b.cases - a.cases);
-    const best = strategies[0];
+      const overhang = 1;
+      const effectiveL = palletL + overhang * 2;
+      const effectiveW = palletW + overhang * 2;
 
+      const strategies = [
+        { name: "Simple", ...packSimple(effectiveL, effectiveW, bl, bw) },
+        { name: "True Mixed", ...packMixed(effectiveL, effectiveW, bl, bw) }
+      ];
 
-    // --- Render results for each slot size ---
-    slots.forEach(slot => {
+      strategies.sort((a, b) => b.cases - a.cases);
+      const best = strategies[0];
+
+      slots.forEach(slot => {
         const ti = best.cases;
         lastResults.push({ slotHeight: slot, TI: ti, Strategy: best.name });
-  
-    const card = document.createElement('div');
-    card.className = "result-card";
-    card.innerHTML = `
-    <div class="result-header">Top View</div>
-    <div class="result-metrics">
-      <span>TI (per layer): <span class="highlight">${ti}</span></span>
-    </div>
-  `;
 
-  
-    // Canvas for pallet view
-    const canvas = document.createElement('canvas');
-    canvas.width = 400;
-    canvas.height = 360;
-    card.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
-  
-    const palletL = 48;
-    const palletW = 40;
-    const overhang = 1; // inches per side
-    
-    // Effective pallet area for fitting
-    const effectiveL = palletL + overhang * 2;
-    const effectiveW = palletW + overhang * 2;
-  
-        // Scale drawing to match the effective area
-    const scaleX = canvas.width / effectiveL;
-    const scaleY = (canvas.height - 40) / effectiveW;
-    
-    // Draw outer pallet area (including overhang)
-    //ctx.strokeStyle = "#000";
-    //ctx.lineWidth = 2;
-    //ctx.strokeRect(0, 0, effectiveL * scaleX, effectiveW * scaleY);
-      
-    // Draw each case (no misleading gray area at end)
-    best.placements.forEach(p => {
-        ctx.fillStyle = p.rot ? '#0071ce' : '#ffc220';
-        ctx.fillRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
-        ctx.strokeStyle = "#000";
-        ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
-    });
-  
-    // Label bottom (always centered for full pallet)
-    ctx.fillStyle = "#000";
-    ctx.font = "14px Arial";
-    const bottomText = "Pallet's Longest Side";
-    const bottomWidth = ctx.measureText(bottomText).width;
-    ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
-  
-    // Legend (unchanged)
-    const legendContainer = document.createElement('div');
-    legendContainer.style.marginTop = '10px';
-    legendContainer.style.display = 'flex';
-    legendContainer.style.gap = '20px';
-    legendContainer.style.alignItems = 'center';
-    legendContainer.style.paddingTop = '5px';
-    legendContainer.style.borderTop = '1px solid #ccc';
-  
-    const unrotated = document.createElement('div');
-    unrotated.style.display = 'flex';
-    unrotated.style.alignItems = 'center';
-    unrotated.innerHTML = `
-      <div style="width:20px;height:20px;background:#ffc220;margin-right:8px;border:1px solid #000;"></div>
-      <div>
-        Case’s <strong>longest side (Length)</strong><br>
-        aligned with pallet’s <strong>longest side</strong>
-      </div>`;
-    legendContainer.appendChild(unrotated);
-  
-    const rotated = document.createElement('div');
-    rotated.style.display = 'flex';
-    rotated.style.alignItems = 'center';
-    rotated.innerHTML = `
-      <div style="width:20px;height:20px;background:#0071ce;margin-right:8px;border:1px solid #000;"></div>
-      <div>
-        Case’s <strong>shortest side (Width)</strong><br>
-        aligned with pallet’s <strong>longest side</strong>
-      </div>`;
-    legendContainer.appendChild(rotated);
-  
-    card.appendChild(legendContainer);
-    results.appendChild(card);
-  });
+        const card = document.createElement('div');
+        card.className = "result-card";
+        card.innerHTML = `
+          <div class="result-header">Top View</div>
+          <div class="result-metrics">
+            <span>TI (per layer): <span class="highlight">${ti}</span></span>
+          </div>
+        `;
 
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 360;
+        card.appendChild(canvas);
 
-    showPage(4);
-}
+        const ctx = canvas.getContext('2d');
+        const scaleX = canvas.width / effectiveL;
+        const scaleY = (canvas.height - 40) / effectiveW;
 
-
-/* ---------- Send To QA ---------- */
-async function sendToQA(){
-    const payload={
-        dcNumber:document.getElementById('dcNumber').value,
-        associateName:document.getElementById('associateName').value,
-        dockDoor:document.getElementById('dockDoor').value,
-        itemNumber:document.getElementById('itemNumber').value,
-        length:document.getElementById('length').value,
-        width:document.getElementById('width').value,
-        height:document.getElementById('height').value,
-    };
-    try{
-        const resp = await fetch('/api/submit',{
-            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+        best.placements.forEach(p => {
+          ctx.fillStyle = p.rot ? '#0071ce' : '#ffc220';
+          ctx.fillRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
+          ctx.strokeStyle = "#000";
+          ctx.strokeRect(p.x * scaleX, p.y * scaleY, p.w * scaleX, p.h * scaleY);
         });
+
+        ctx.fillStyle = "#000";
+        ctx.font = "14px Arial";
+        const bottomText = "Pallet's Longest Side";
+        const bottomWidth = ctx.measureText(bottomText).width;
+        ctx.fillText(bottomText, (canvas.width - bottomWidth) / 2, canvas.height - 5);
+
+        const legendContainer = document.createElement('div');
+        legendContainer.style.marginTop = '10px';
+        legendContainer.style.display = 'flex';
+        legendContainer.style.gap = '20px';
+        legendContainer.style.alignItems = 'center';
+        legendContainer.style.paddingTop = '5px';
+        legendContainer.style.borderTop = '1px solid #ccc';
+
+        const unrotated = document.createElement('div');
+        unrotated.style.display = 'flex';
+        unrotated.style.alignItems = 'center';
+        unrotated.innerHTML = `
+          <div style="width:20px;height:20px;background:#ffc220;margin-right:8px;border:1px solid #000;"></div>
+          <div> Case’s <strong>longest side (Length)</strong><br>
+            aligned with pallet’s <strong>longest side</strong> </div>
+        `;
+        legendContainer.appendChild(unrotated);
+
+        const rotated = document.createElement('div');
+        rotated.style.display = 'flex';
+        rotated.style.alignItems = 'center';
+        rotated.innerHTML = `
+          <div style="width:20px;height:20px;background:#0071ce;margin-right:8px;border:1px solid #000;"></div>
+          <div> Case’s <strong>shortest side (Width)</strong><br>
+            aligned with pallet’s <strong>longest side</strong> </div>
+        `;
+        legendContainer.appendChild(rotated);
+
+        card.appendChild(legendContainer);
+        results.appendChild(card);
+      });
+
+      showPage(4);
+    }
+
+    // ---------- Send To QA ----------
+    async function sendToQA() {
+      const payload = {
+        dcNumber: document.getElementById('dcNumber').value,
+        associateName: document.getElementById('associateName').value,
+        dockDoor: document.getElementById('dockDoor').value,
+        itemNumber: document.getElementById('itemNumber').value,
+        length: document.getElementById('length').value,
+        width: document.getElementById('width').value,
+        height: document.getElementById('height').value,
+      };
+
+      try {
+        const resp = await fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
         const data = await resp.json();
-        if(!resp.ok) throw new Error(data.error||'Error sending to QA');
+        if (!resp.ok) throw new Error(data.error || 'Error sending to QA');
         alert('✅ Sent to QA!');
-    }catch(err){
+      } catch (err) {
         console.error(err);
         alert('❌ Failed to send to QA');
+      }
     }
-}
-</script>
+  </script>
 </body>
 </html>
