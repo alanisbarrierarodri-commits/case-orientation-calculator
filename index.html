@@ -369,11 +369,12 @@ function calculate() {
 async function sendToQA(){
     const payload={
         dcNumber:document.getElementById('dcNumber').value,
+        associateName:document.getElementById('associateName').value,
+        dockDoor:document.getElementById('dockDoor').value,
         itemNumber:document.getElementById('itemNumber').value,
         length:document.getElementById('length').value,
         width:document.getElementById('width').value,
         height:document.getElementById('height').value,
-        slotResults:lastResults
     };
     try{
         const resp = await fetch('/api/submit',{
